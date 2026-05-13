@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Attendance - PGMS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body {
+    background: linear-gradient(to bottom right, #e3f2fd, #f8f9fa);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    margin: 0;
+    animation: fadeIn 1s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: linear-gradient(180deg,#1a49b0,#6a11cb);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    height: 100vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  .sidebar h2 { text-align: center; font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 1px; }
+  .nav-links { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+  .nav-links li { margin-bottom: 20px; }
+  .nav-links li a {
+    text-decoration: none;
+    color: #cbd5e1;
+    display: block;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: 0.3s;
+    font-weight: 500;
+  }
+  .nav-links li a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+  .nav-links li a.active { background: #fff; color: #2575fc; font-weight: 600; }
+  .logout-btn {
+    margin-top: auto;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 10px;
+    background: #fff;
+    color: #2575fc;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .logout-btn:hover { background: #f1f1f1; }
+
+  /* Content */
+  .content { flex-grow: 1; margin-left: 260px; padding: 40px 20px; min-height: 100vh; }
+
+  h1.caption {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 1s ease-in;
+  }
+
+  .attendance-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    padding: 40px 30px;
+    max-width: 1300px;
+    margin: auto;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .attendance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  h2.attendance-title {
+    color: #2575fc;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg,#6a11cb,#2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p.caption-text { font-size: 17px; color: #6c757d; margin-bottom: 25px; }
+
+  table { border-radius: 10px; overflow: hidden; }
+  thead { background-color: #2575fc; color: #fff; }
+  tbody tr:nth-child(even) { background-color: #e7f1ff; }
+  tbody tr:hover { background-color: #cfe2ff; }
+  caption { caption-side: top; font-weight: 600; color: #2575fc; padding-bottom: 10px; }
+  .no-records { color: #6c757d; font-style: italic; padding: 15px; }
+
+  footer { text-align: center; margin-top: 25px; font-size: 14px; color: #6c757d; }
+  footer span { color: #2575fc; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 15px;
+    }
+    .content { margin-left: 0; padding: 20px; }
+    .nav-links { display: flex; flex-direction: row; gap: 10px; }
+    h1.caption { font-size: 1.4rem; }
+  }
+</style>
+</head>
+
+<body>
+<div class="sidebar">
+  <h2>User Panel</h2>
+  <ul class="nav-links" id="nav-links"></ul>
+  <button class="logout-btn" id="logout-btn">Logout</button>
+</div>
+
+<div class="content">
+  <h1 class="caption">Welcome, <span id="welcome-username">User</span>!</h1>
+
+  <div class="attendance-card">
+    <h2 class="attendance-title">My Attendance History</h2>
+    <p class="caption-text">Track your daily check-in and check-out details easily</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle" id="attendanceTable">
+        <caption>Attendance Records</caption>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Check In</th>
+            <th scope="col">Check Out</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="no-records">Loading your attendance...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      Powered by <span>PGMS</span> | Attendance Monitoring System
+    </footer>
+  </div>
+</div>
+
+<script>
+  const studentLinks = [
+    { name: 'Attendance', href: 'attendance.html' },
+    { name: 'Complaints', href: 'complaints.html' },
+    { name: 'Notifications', href: 'notifications.html' },
+    { name: 'Payments', href: 'payments.html' },
+    { name: 'Rooms', href: 'rooms.html' },
+    { name: 'Meal Plan', href: 'mealplan.html' }
+  ];
+
+  async function loadUserInfo() {
+    try {
+      const userRes = await fetch('/users/me');
+      if (!userRes.ok) throw new Error('Not logged in');
+      const userData = await userRes.json();
+      document.getElementById('welcome-username').textContent = userData.name || 'User';
+      const nav = document.getElementById('nav-links');
+      studentLinks.forEach(link => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.name;
+        if(window.location.pathname.includes(link.href)) a.classList.add('active');
+        li.appendChild(a);
+        nav.appendChild(li);
+      });
+      return userData._id || userData.id;
+    } catch (err) {
+      console.error(err);
+      document.getElementById('welcome-username').textContent = 'Guest';
+      return null;
+    }
+  }
+
+  async function loadMyAttendance() {
+    const userId = await loadUserInfo();
+    const attendanceTableBody = document.querySelector('#attendanceTable tbody');
+    if (!userId) {
+      attendanceTableBody.innerHTML = `<tr><td colspan="3" class="no-records">Please login to see attendance.</td></tr>`;
+      return;
+    }
+    try {
+      const res = await fetch(`/attendance/user/${userId}`);
+      if (!res.ok) throw new Error('Cannot load attendance records');
+      const records = await res.json();
+      attendanceTableBody.innerHTML = '';
+      if (!records.length) {
+        attendanceTableBody.innerHTML = `<tr><td colspan="3" class="no-records">No attendance records found</td></tr>`;
+        return;
+      }
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(r.date).toLocaleDateString()}</td>
+          <td>${r.checkIn ? new Date(r.checkIn).toLocaleTimeString() : '-'}</td>
+          <td>${r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '-'}</td>
+        `;
+        attendanceTableBody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error(err);
+      attendanceTableBody.innerHTML = `<tr><td colspan="3" class="no-records">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/user/logout', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) window.location.href = 'login.html';
+      else alert('Logout failed');
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  loadMyAttendance();
+</script>
+</body>
+</html>

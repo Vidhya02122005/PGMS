@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>User Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { display:flex; min-height:100vh; background:#f5f7fa; color:#1a2a6c; }
+
+  /* Sidebar */
+  .sidebar {
+    width:260px;
+    background: linear-gradient(180deg,#1a49b0,#6a11cb);
+    color:#ffffff;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    padding:30px 20px;
+    position:fixed;
+    height:100%;
+    overflow-y:auto;
+  }
+  .sidebar h2 { color:#ffffff;text-align:center; font-size:1.8rem; margin-bottom:30px; letter-spacing:1px; }
+  .nav-links { list-style:none; flex-grow:1; }
+  .nav-links li { margin-bottom:20px; }
+  .nav-links li a { text-decoration:none; color:#cbd5e1; display:block; padding:12px 15px; border-radius:10px; transition:0.3s; font-weight:500; }
+  .nav-links li a:hover { background: rgba(255,255,255,0.15); color:#fff; }
+  .nav-links li a.active { background:#fff; color:#2575fc; font-weight:600; }
+
+  .logout-btn {
+    margin-top:auto;
+    padding:12px 15px;
+    border:none;
+    border-radius:10px;
+    background:#ffffff;
+    color:#0015f9;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+  }
+  .logout-btn:hover { background:#f1f1f1; }
+
+  /* Content */
+  .content { flex-grow:1; margin-left:260px; padding:40px 20px; min-height:100vh; overflow-y:auto; }
+  h1.caption { font-weight:700; font-size:2rem; margin-bottom:10px; color:#0713b7; text-shadow:1px 1px 2px rgba(0,0,0,0.2); border-left:4px solid #6a11cb; padding-left:8px; }
+  p { font-size:1rem; color:#1a2a6c; margin-bottom:15px; }
+
+  /* Meal Plan Carousel */
+  .meal-plan { margin-top:20px; }
+  .meal-plan h2 { font-size:1.8rem; color:#2575fc; margin-bottom:15px; text-align:center; }
+  .carousel-container { width:100%; max-width:700px; margin:0 auto; overflow:hidden; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.1); background:#fff; }
+  .carousel-slide { display:flex; transition: transform 0.5s ease-in-out; }
+  .carousel-item { min-width:100%; position:relative; }
+  .carousel-item img { width:100%; height:300px; object-fit:cover; border-radius:15px; }
+  .overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(30,64,175,0.8); color:#fff; padding:15px; border-bottom-left-radius:15px; border-bottom-right-radius:15px; }
+  .overlay h3 { margin:0 0 5px 0; font-size:18px; }
+  .overlay p { margin:0; font-size:14px; }
+
+  .controls { display:flex; justify-content:space-between; max-width:700px; margin:10px auto 0; }
+  .btn { padding:8px 16px; background:#1e40af; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:0.3s; }
+  .btn:hover { background:#2563eb; }
+
+  @media (max-width:768px){
+    .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; overflow-x:auto; padding:15px;}
+    .content{ margin-left:0; padding:20px; }
+    .nav-links{ display:flex; flex-direction:row; gap:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>User Panel</h2>
+  <ul class="nav-links" id="nav-links"></ul>
+  <button class="logout-btn" id="logout-btn">Logout</button>
+</div>
+
+<div class="content">
+  <h1 class="caption">Welcome, <span id="welcome-username">User</span>!</h1>
+  <p>Select an option from the sidebar to get started.</p>
+
+  
+    
+    
+  </div>
+</div>
+
+<script>
+  const studentLinks = [
+    { name: 'Attendance', href: 'attendance.html' },
+    { name: 'Complaints', href: 'complaints.html' },
+    { name: 'Notifications', href: 'notifications.html' },
+    { name: 'Payments', href: 'payments.html' },
+    { name: 'Rooms', href: 'rooms.html' },
+    { name: 'Meal Plan', href: 'mealplan.html' }
+  ];
+
+  const adminLinks = [
+    { name: 'Registrations', href: 'registrations.html' },
+    { name: 'Rooms', href: 'rooms.html' },
+    { name: 'Attendance', href: 'attendance.html' },
+    { name: 'Notifications', href: 'notifications.html' },
+    { name: 'Complaints', href: 'complaints.html' },
+    { name: 'Payments', href: 'payments.html' },
+    { name: 'Meal Plan', href: 'mealplan.html' }
+  ];
+
+  // Sidebar links and username
+  fetch('/users/me')
+    .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
+    .then(data => {
+      const username = data.name || 'Guest';
+      const role = data.role || 'student';
+      document.getElementById('welcome-username').textContent = username;
+      const nav = document.getElementById('nav-links');
+      const links = role === 'admin' ? adminLinks : studentLinks;
+      links.forEach(link => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.textContent = link.name;
+        if(window.location.pathname.includes(link.href)) a.classList.add('active');
+        li.appendChild(a);
+        nav.appendChild(li);
+      });
+    })
+    .catch(err => console.error(err));
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    fetch('/user/logout', { method:'POST' })
+      .then(res => res.json())
+      .then(data => data.success ? window.location.reload() : alert('Logout failed'))
+      .catch(err => console.error(err));
+  });
+
+  // Meal Carousel
+  const carouselSlide = document.getElementById('carouselSlide');
+  const carouselItems = document.querySelectorAll('.carousel-item');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let counter = 0;
+  function updateCarousel() {
+    carouselSlide.style.transform = `translateX(${-counter * 100}%)`;
+  }
+  nextBtn.addEventListener('click', () => { counter = (counter + 1) % carouselItems.length; updateCarousel(); });
+  prevBtn.addEventListener('click', () => { counter = (counter - 1 + carouselItems.length) % carouselItems.length; updateCarousel(); });
+  setInterval(() => { nextBtn.click(); }, 5000);
+</script>
+
+</body>
+</html>

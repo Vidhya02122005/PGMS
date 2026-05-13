@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+  body {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    color: #1a2a6c;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #1a49b0, #6a11cb);
+    color: #fff;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .sidebar h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+
+  }
+
+  .profile {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .profile img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    margin-bottom: 10px;
+  }
+
+  .profile h3 { font-size:1.2rem; font-weight:600; }
+
+  .nav-links {
+    list-style: none;
+    flex-grow: 1;
+  }
+
+  .nav-links li { margin-bottom: 20px; }
+
+  .nav-links li a {
+    text-decoration:none;
+    color: #cbd5e1;
+    display: block;
+    padding:12px 15px;
+    border-radius:10px;
+    transition: all 0.3s;
+    font-weight:500;
+  }
+
+  .nav-links li a:hover { background: rgba(255,255,255,0.15); color:#fff; }
+  .nav-links li a.active { background: #fff; color:#2575fc; font-weight:600; }
+
+  /* Content */
+  .content {
+    flex-grow: 1;
+    margin-left: 260px;
+    padding: 40px 20px;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  h1.caption {
+    font-weight:700;
+    font-size:1.6rem;
+    margin-bottom:10px;
+    color:#0713b7;
+    text-shadow:1px 1px 2px rgba(0,0,0,0.2);
+    border-left:4px solid #6a11cb;
+    padding-left:8px;
+  }
+
+  p {
+    font-size:1rem;
+    color:#1a2a6c;
+    margin-bottom:15px;
+  }
+
+  @media (max-width:768px){
+    .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; overflow-x:auto; padding:15px;}
+    .content{ margin-left:0; padding:20px; }
+    .nav-links{ display:flex; flex-direction:row; gap:10px; }
+    .profile{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Admin Panel</h2>
+  <div class="profile">
+    <img src="profile.jpg" alt="Admin Profile">
+    <h3>VIDHYA</h3>
+  </div>
+  <ul class="nav-links">
+    <li><a href="registrations.html">Registrations</a></li>
+    <li><a href="rooms.html">Rooms</a></li>
+    <li><a href="attendance.html">Attendance</a></li>
+    <li><a href="notifications.html">Notifications</a></li>
+    <li><a href="complaints.html">Complaints</a></li>
+    <li><a href="payments.html">Payments</a></li>
+  
+  </ul>
+</div>
+
+<div class="content">
+  <h1 class="caption">Welcome, Admin!</h1>
+  <p>Select an option from the sidebar to get started.</p>
+
+</div>
+
+</body>
+</html>

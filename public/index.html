@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGMS - Home</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* Reset */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Arial,sans-serif; }
+body { display:flex; flex-direction:column; min-height:100vh; line-height:1.6; transition: background 0.3s, color 0.3s; }
+
+/* Dark Mode */
+body.dark { color:#e6eef8; }
+body.dark #themeBtn { color:#fff; background: rgba(0,0,0,0.25); }
+body.dark .cta, body.dark footer { filter: brightness(0.9); }
+
+/* Navbar */
+nav {
+  background: linear-gradient(90deg,#1e3a8a,#2563eb);
+  padding:15px 40px; display:flex; justify-content:space-between; align-items:center;
+  color:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.15); position:sticky; top:0; z-index:1000; 
+}
+nav .logo { font-size:28px; font-weight:bold; display:flex; align-items:center; gap:8px;  }
+nav ul { list-style:none; display:flex; gap:25px; align-items:center; }
+nav ul li a { font:60px; color:#fff; text-decoration:none; font-weight:600; position:relative; transition:all 0.3s; }
+nav ul li a::after { content:""; position:absolute; width:0%; height:2px; bottom:-5px; left:0; background:#f9d342; transition:width 0.3s; }
+nav ul li a:hover::after { width:100%; }
+#themeBtn { background: rgba(255,255,255,0.2); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; color:#fff; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+#themeBtn:hover { background: rgba(255,255,255,0.35); }
+
+
+/* Hero Section */
+.hero {
+  position:relative;
+  background:url('zolo mayfield.webp') no-repeat center center/cover;
+  height:100vh;
+  display:flex; justify-content:center; align-items:center;
+}
+.hero::before {
+  content:""; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45);
+}
+.hero-content { position:relative; text-align:center; color:#fff; max-width:800px; padding:20px; }
+.hero-content h1 { font-size:48px; font-weight:bold; margin-bottom:30px; text-shadow:2px 2px 10px rgba(0,0,0,0.5); }
+.hero-content .btn {
+  margin: 10px;
+  padding: 16px 38px;
+  font-size: 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(45deg, #007BFF, #0066d2, #007BFF);
+  box-shadow: 0 6px 15px rgba(26, 26, 26, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: inline-block;
+}
+
+/* Lift effect on hover */
+.hero-content .btn:hover {
+  transform: translateY(-8px);   /* button lifts up */
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);  /* shadow gets bigger */
+}
+
+
+
+/* Amenities Section */
+.amenities { padding:80px 10px; text-align:center; background:#f8f9fa; }
+.amenities h2 { font-size:36px; margin-bottom:50px; color:#1e3a8a; font-weight:bold; }
+.amenities-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:35px; justify-items:center; }
+.amenity-item { background:#fff; padding:25px; border-radius:15px; width:100%; max-width:260px; box-shadow:0 6px 20px rgba(0,0,0,0.08); transition: all 0.4s; cursor:pointer; }
+.amenity-item i { font-size:38px; margin-bottom:15px; color:#2563eb; transition: all 0.3s; }
+.amenity-item h3 { font-size:18px; font-weight:600; }
+.amenity-item:hover { transform: translateY(-8px) scale(1.05); background:#eef2ff; }
+.amenity-item:hover i { color:#1e3a8a; transform:rotate(10deg) scale(1.2); }
+.view-all { margin-top:40px; }
+.btn-secondary { padding:14px 32px; background:#1e3a8a; color:#fff; border-radius:8px; font-weight:500; text-decoration:none; transition:all 0.3s; }
+.btn-secondary:hover { background:#f9d342; color:#000; }
+
+/* CTA Section */
+.cta { background: linear-gradient(135deg,#1e3a8a,#2563eb); color:white; padding:80px 20px; text-align:center;  }
+.cta h2 { font-size:36px; margin-bottom:20px; }
+.cta p { font-size:18px; margin-bottom:30px; }
+.btn-primary { padding:16px 38px; background:#f9d342; color:#000; font-weight:bold; border-radius:8px; text-decoration:none; transition:all 0.3s; }
+.btn-primary:hover { background:#fff; color:#1e3a8a; }
+
+/* Footer */
+footer { background:#1e3a8a; color:#fff; padding:50px 20px 20px; margin-top:0px; }
+.footer-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:40px; margin-bottom:30px; }
+.footer-about h3, .footer-links h3, .footer-contact h3 { margin-bottom:15px; font-size:20px; color:#f9d342; }
+.footer-about p, .footer-links ul li a, .footer-contact p { color:#ddd; font-size:15px; transition: color 0.3s; }
+.footer-links ul { list-style:none; padding:0; }
+.footer-links ul li { margin-bottom:10px; }
+.footer-links ul li a { text-decoration:none; transition:0.3s; }
+.footer-links ul li a:hover { color:#f9d342; padding-left:5px; }
+.footer-contact i { margin-right:8px; color:#f9d342; }
+.footer-bottom { text-align:center; border-top:1px solid #ffffff; padding-top:15px; font-size:14px; color:#bbb; }
+
+/* Footer social icons in white */
+footer .social-links i {
+  color: #ffffff; /* White color */
+  transition: all 0.3s;
+}
+
+/* Optional hover effect */
+footer .social-links i:hover {
+  color: #f9d342; /* Yellow on hover */
+  transform: scale(1.2);
+}
+
+/* Logo animation */
+.logo i {
+  color: #fff;
+  display: inline-block;
+  animation: bounce 2s infinite;
+  transition: color 0.3s;
+}
+
+.logo:hover i {
+  color: #f9d342; /* Change color on hover */
+}
+
+/* Keyframes for bounce */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+.hero-content h1 {
+  font-size: 78px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+  opacity: 0;                 /* Start hidden */
+  transform: translateY(20px); /* Start slightly below */
+  animation: slideFadeIn 1.5s ease-out forwards;
+}
+
+/* Keyframes for fade-in + slide-up */
+@keyframes slideFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><i class="fa-solid fa-house"></i> MyPG</div>
+  <div style="display:flex;align-items:center;gap:20px;">
+    <ul>
+      <li><a href="aboutus.html">About Us</a></li>
+      <li><a href="contactus.html">Contact Us</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>Welcome to MyPG </h1>
+    <a class="btn" href="/admin/login.html">Admin Login</a>
+    <a class="btn" href="/user/login.html">User Login</a>
+  </div>
+</section>
+
+<section class="amenities">
+  <h2>Our Amenities</h2>
+  <div class="amenities-grid">
+    <div class="amenity-item"><i class="fas fa-wifi"></i><h3>High-Speed WiFi</h3></div>
+    <div class="amenity-item"><i class="fas fa-utensils"></i><h3>Dining Hall</h3></div>
+    <div class="amenity-item"><i class="fas fa-tv"></i><h3>Common TV Room</h3></div>
+    <div class="amenity-item"><i class="fas fa-dumbbell"></i><h3>Fitness Center</h3></div>
+    <div class="amenity-item"><i class="fas fa-tshirt"></i><h3>Laundry Service</h3></div>
+    <div class="amenity-item"><i class="fas fa-broom"></i><h3>Housekeeping</h3></div>
+  </div>
+  
+</section>
+
+<section class="cta">
+  <h2>Looking for a Place to Stay?</h2>
+  <p>Book a visit to SafeStay PG and experience our comfortable accommodations</p>
+  <a href="contactus.html" class="btn-primary">Contact Us</a>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-about">
+      <h3>PG Connect</h3>
+      <p>Your trusted platform for finding the perfect paying guest accommodation.</p>
+      <div class="social-links">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="listings.html">PG Listings</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms & Conditions</a></li>
+      </ul>
+    </div>
+    <div class="footer-contact">
+      <h3>Contact Us</h3>
+      <p><i class="fas fa-map-marker-alt"></i> 123 Main Street, Chennai, India</p>
+      <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+      <p><i class="fas fa-envelope"></i> info@pgconnect.com</p>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>&copy; 2023 PG Connect. All Rights Reserved.</p></div>
+</footer>
+
+<script>
+const bodyEl = document.body;
+const themeBtn = document.getElementById('themeBtn');
+const themeIcon = document.getElementById('themeIcon');
+
+const savedTheme = localStorage.getItem('pgms_theme');
+if(savedTheme==='dark'){ bodyEl.classList.add('dark'); themeIcon.className='fa-solid fa-sun'; }
+
+themeBtn.addEventListener('click', ()=>{
+  bodyEl.classList.toggle('dark');
+  const isDark = bodyEl.classList.contains('dark');
+  themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  localStorage.setItem('pgms_theme', isDark ? 'dark' : 'light');
+});
+</script>
+
+</body>
+</html>

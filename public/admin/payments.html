@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Payments</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+  }
+
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    width: 96%;
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .caption {
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    color: #0713b7;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    border-left: 4px solid #6a11cb;
+    padding-left: 8px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .filters input, .filters select {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    flex: 1;
+    overflow-x: auto;
+    display: block;
+  }
+
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    background: #2575fc;
+    color: #fff;
+  }
+
+  tbody {
+    display: block;
+    max-height: 350px;
+    overflow-y: auto;
+  }
+
+  tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    word-wrap: break-word;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #f4f6fb;
+  }
+
+  tbody tr:hover td {
+    background: #dde4f0;
+  }
+
+  button, select {
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  select {
+    font-weight: 600;
+  }
+
+  button:hover, select:hover {
+    opacity: 0.9;
+    transform: scale(1.01);
+  }
+
+  @media(max-width:768px){
+    table, thead, tbody, tr, th, td {
+      display: block;
+    }
+    th, td {
+      text-align: left;
+    }
+    tbody {
+      max-height: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Admin Payments</h2>
+  <div class="caption">All Payments</div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input type="text" id="searchName" placeholder="Search by Name">
+    <input type="text" id="searchEmail" placeholder="Search by Email">
+    <select id="filterStatus">
+      <option value="">All Status</option>
+      <option value="Pending">Pending</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <input type="date" id="filterDate">
+  </div>
+
+  <table id="adminPaymentsTable">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Amount</th>
+        <th>Txn ID</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Update Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+let paymentsData = []; // store fetched payments
+
+// Fetch payments from server
+async function fetchAdminPayments() {
+    const res = await fetch('/admin/payments');
+    const data = await res.json();
+    const tbody = document.querySelector('#adminPaymentsTable tbody');
+    tbody.innerHTML = '';
+
+    if(data.success){
+        paymentsData = data.payments;
+        renderTable(paymentsData);
+    } else {
+      tbody.innerHTML = '<tr><td colspan="7">No payments found</td></tr>';
+    }
+}
+
+// Render table rows
+function renderTable(data) {
+    const tbody = document.querySelector('#adminPaymentsTable tbody');
+    tbody.innerHTML = '';
+    data.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${p.userId?.name || 'N/A'}</td>
+            <td>${p.userId?.email || 'N/A'}</td>
+            <td>${p.amount}</td>
+            <td>${p.txnId}</td>
+            <td>${p.status}</td>
+            <td>${new Date(p.date).toLocaleString()}</td>
+            <td>
+                <select onchange="updateStatus('${p._id}', this.value)">
+                    <option value="Pending" ${p.status==='Pending'?'selected':''}>Pending</option>
+                    <option value="Completed" ${p.status==='Completed'?'selected':''}>Completed</option>
+                </select>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Update payment status
+async function updateStatus(id, status){
+    await fetch(`/admin/payments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+    });
+    alert('Payment status updated');
+    fetchAdminPayments();
+}
+
+// Filter table dynamically
+function applyFilters() {
+    const nameValue = document.getElementById('searchName').value.toLowerCase();
+    const emailValue = document.getElementById('searchEmail').value.toLowerCase();
+    const statusValue = document.getElementById('filterStatus').value;
+    const dateValue = document.getElementById('filterDate').value;
+
+    const filtered = paymentsData.filter(p => {
+        const userName = p.userId?.name?.toLowerCase() || '';
+        const userEmail = p.userId?.email?.toLowerCase() || '';
+        const paymentDate = new Date(p.date).toISOString().split('T')[0];
+
+        return (
+            userName.includes(nameValue) &&
+            userEmail.includes(emailValue) &&
+            (statusValue === '' || p.status === statusValue) &&
+            (dateValue === '' || paymentDate === dateValue)
+        );
+    });
+
+    renderTable(filtered);
+}
+
+// Add event listeners
+document.getElementById('searchName').addEventListener('input', applyFilters);
+document.getElementById('searchEmail').addEventListener('input', applyFilters);
+document.getElementById('filterStatus').addEventListener('change', applyFilters);
+document.getElementById('filterDate').addEventListener('change', applyFilters);
+
+fetchAdminPayments();
+</script>
+
+</body>
+</html>

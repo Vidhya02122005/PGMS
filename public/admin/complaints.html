@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PGMS Admin Complaints</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* Full height flex layout */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+/* Main container fills full screen */
+.main-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+/* Card maximized */
+.card {
+    background: rgba(255,255,255,0.95);
+    color: #1a2a6c;
+    border-radius: 15px;
+    width: 100%;
+    height: 100%;
+    max-width: 1600px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+}
+
+/* Gradient Headings */
+h2 {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: -webkit-linear-gradient(#2575fc, #6a11cb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+p.description {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Table */
+table {
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    background: #fdfdfd;
+}
+/* Ensure table header background and text color override Bootstrap */
+table thead th {
+    background-color: #2575fc !important; /* Solid blue */
+    color: #fff !important;               /* White text */
+    text-transform: uppercase;
+    padding: 14px;
+}
+
+tbody tr:nth-child(even) { background-color: #f4f6fb; }
+tbody tr:hover { background-color: #dde4f0; }
+caption {
+    caption-side: top;
+    text-align: center;
+    font-weight: 600;
+    color:#1a2a6c;
+    padding-bottom:10px;
+}
+
+/* Dropdown */
+select {
+    padding: 8px 14px;
+    border: 1px solid #2575fc;
+    border-radius: 6px;
+    background: #eef3ff;
+    color: #2575fc;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+select:hover {
+    background: #e0eaff;
+    border-color: #1e63e9;
+}
+
+/* Status colors */
+.status {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.Pending { color: #ffc107; }
+.InProgress { color: #0dcaf0; }
+.Resolved { color: #198754; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  h2 { font-size: 1.5rem; }
+  th, td { padding: 10px; font-size: 14px; }
+  select { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="main-container">
+  <div class="card">
+    <h2>Admin Complaints</h2>
+    <p class="description">View and manage all complaints submitted by users.</p>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered caption-top align-middle text-center" id="complaintsTable">
+        <caption>Complaints Overview</caption>
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Complaint</th>
+            <th>Status</th>
+            <th>Submitted At</th>
+            <th>Update Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="text-align:center;">Loading complaints...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadComplaints() {
+  const tbody = document.querySelector('#complaintsTable tbody');
+  try {
+    const res = await fetch('/admin/complaints/data', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Network response not ok');
+    const data = await res.json();
+    tbody.innerHTML = '';
+
+    if (!data.success || !Array.isArray(data.complaints) || data.complaints.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No complaints found</td></tr>';
+      return;
+    }
+
+    data.complaints.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.userId?.name || '-'}</td>
+        <td>${c.userId?.email || '-'}</td>
+        <td style="text-align:left; max-width:400px;">${c.complaint}</td>
+        <td class="status ${c.status}">${c.status}</td>
+        <td>${new Date(c.createdAt).toLocaleString()}</td>
+        <td>
+          <select data-id="${c._id}">
+            <option value="Pending" ${c.status==='Pending'?'selected':''}>Pending</option>
+            <option value="InProgress" ${c.status==='InProgress'?'selected':''}>In Progress</option>
+            <option value="Resolved" ${c.status==='Resolved'?'selected':''}>Resolved</option>
+          </select>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('select[data-id]').forEach(sel => {
+      sel.addEventListener('change', async e => {
+        const id = e.target.dataset.id;
+        const status = e.target.value;
+        await fetch(`/admin/complaints/${encodeURIComponent(id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        loadComplaints();
+      });
+    });
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Error loading complaints</td></tr>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadComplaints);
+</script>
+
+</body>
+</html>

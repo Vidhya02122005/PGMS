@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Details</title>
+<style>
+  /* ===== Body ===== */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+
+  /* ===== Cards ===== */
+  .card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    padding: 25px 30px;
+    margin-bottom: 25px;
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Headings ===== */
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    color: #1e3a8a;
+    margin-bottom: 15px;
+  }
+
+  /* ===== Tables ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+  }
+
+  th {
+    background: linear-gradient(135deg, #2575fc);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) { background: #f9f9f9; }
+
+  /* ===== Buttons ===== */
+  button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #2575fc);
+    color: #fff;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+  }
+
+  /* ===== Payment Slip ===== */
+  #slip {
+    display: none;
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    margin: 0 auto 30px auto;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  /* ===== Responsive ===== */
+  @media(max-width: 900px) {
+    table, th, td { font-size: 12px; }
+    th, td { padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>User Details</h2>
+
+  <div class="card">
+    <h3>Basic Information</h3>
+    <p><strong>Name:</strong> <span id="userName"></span></p>
+    <p><strong>Date of Birth:</strong> <span id="userDob"></span></p>
+    <p><strong>Phone:</strong> <span id="userPhone"></span></p>
+    <p><strong>Email:</strong> <span id="userEmail"></span></p>
+    <p><strong>Address:</strong> <span id="userAddress"></span></p>
+    <p><strong>Mother's Name:</strong> <span id="motherName"></span> | <strong>Phone:</strong> <span id="motherPhone"></span></p>
+    <p><strong>Father's Name:</strong> <span id="fatherName"></span> | <strong>Phone:</strong> <span id="fatherPhone"></span></p>
+    <p><strong>Guardian's Name:</strong> <span id="guardianName"></span> | <strong>Phone:</strong> <span id="guardianPhone"></span></p>
+  </div>
+
+  <div class="card">
+    <h3>Attendance</h3>
+    <table id="attendanceTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Payments</h3>
+    <table id="paymentsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Slip</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="slip">
+    <h3>Payment Slip</h3>
+    <div id="slipDetails"></div>
+    <button onclick="printSlip()">Print</button>
+  </div>
+
+  <div class="card">
+    <h3>Complaints</h3>
+    <table id="complaintsTable">
+      <thead>
+        <tr>
+          <th>Complaint</th>
+          <th>Status</th>
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function fetchUserDetails() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+  if (!userId) return alert('No user selected');
+
+  try {
+    const res = await fetch(`/admin/user/${userId}`);
+    const data = await res.json();
+    if (!data.success) return alert('Error fetching user details');
+
+    const user = data.user;
+
+    // Basic info
+    document.getElementById('userName').innerText = user.name || '';
+    document.getElementById('userDob').innerText = user.dob ? new Date(user.dob).toLocaleDateString() : '';
+    document.getElementById('userPhone').innerText = user.phone || '';
+    document.getElementById('userEmail').innerText = user.email || '';
+    document.getElementById('userAddress').innerText = user.address || '';
+    document.getElementById('motherName').innerText = user.motherName || '';
+    document.getElementById('motherPhone').innerText = user.motherPhone || '';
+    document.getElementById('fatherName').innerText = user.fatherName || '';
+    document.getElementById('fatherPhone').innerText = user.fatherPhone || '';
+    document.getElementById('guardianName').innerText = user.guardianName || '';
+    document.getElementById('guardianPhone').innerText = user.guardianPhone || '';
+
+    // Attendance
+    const attendanceBody = document.getElementById('attendanceTable').querySelector('tbody');
+    attendanceBody.innerHTML = (!data.attendance || data.attendance.length === 0) ? 
+      '<tr><td colspan="2">No attendance records</td></tr>' : 
+      data.attendance.map(a => `
+        <tr>
+          <td>${a.date ? new Date(a.date).toLocaleDateString() : '-'}</td>
+          <td>${a.status || '-'}</td>
+        </tr>
+      `).join('');
+
+    // Payments
+    const paymentsBody = document.querySelector('#paymentsTable tbody');
+    paymentsBody.innerHTML = (!data.payments || data.payments.length === 0) ? 
+      '<tr><td colspan="5">No payments found</td></tr>' : 
+      data.payments.map(p => `
+        <tr>
+          <td>${new Date(p.date).toLocaleDateString()}</td>
+          <td>${p.amount}</td>
+          <td>${p.method || '-'}</td>
+          <td>${p.status}</td>
+          <td>${p.status === 'Completed' ? `<button onclick='showSlip(${JSON.stringify(p)})'>Print Slip</button>` : '-'}</td>
+        </tr>
+      `).join('');
+
+    // Complaints
+    const complaintsBody = document.getElementById('complaintsTable').querySelector('tbody');
+    complaintsBody.innerHTML = (!data.complaints || data.complaints.length === 0) ? 
+      '<tr><td colspan="3">No complaints submitted</td></tr>' : 
+      data.complaints.map(c => `
+        <tr>
+          <td>${c.complaint}</td>
+          <td>${c.status}</td>
+          <td>${new Date(c.createdAt).toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+  } catch (err) {
+    console.error(err);
+    alert('Server error');
+  }
+}
+
+// Payment Slip functions
+function showSlip(p){
+  const slip = document.getElementById('slip');
+  slip.style.display='block';
+  document.getElementById('slipDetails').innerHTML = `
+    <table style="width:100%; border-collapse: collapse;">
+      <tr><td><strong>User:</strong></td><td>${document.getElementById('userName').innerText}</td></tr>
+      <tr><td><strong>Amount:</strong></td><td>${p.amount}</td></tr>
+      <tr><td><strong>Method:</strong></td><td>${p.method || '-'}</td></tr>
+      <tr><td><strong>Txn ID:</strong></td><td>${p.txnId}</td></tr>
+      <tr><td><strong>Status:</strong></td><td>${p.status}</td></tr>
+      <tr><td><strong>Date:</strong></td><td>${new Date(p.date).toLocaleString()}</td></tr>
+    </table>
+  `;
+}
+
+function printSlip(){
+  const slipContent = document.getElementById('slip').innerHTML;
+  const style = `
+    <style>
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+      h3 { text-align:center; color:#1e3a8a; }
+      table { width:100%; border-collapse: collapse; }
+      td { padding:5px; }
+      strong { display:inline-block; width:100px; }
+    </style>
+  `;
+  const w = window.open('', '', 'width=500,height=600');
+  w.document.write(`<html><head>${style}</head><body>${slipContent}</body></html>`);
+  w.document.close();
+  w.print();
+}
+
+window.onload = fetchUserDetails;
+</script>
+</body>
+</html>

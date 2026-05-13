@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Room Management - Admin</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 15px 25px;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  .stats-card {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.stats-card div {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color:  #fbfdff;
+  padding: 25px 35px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.3rem;
+  text-align: center;
+  min-width: 180px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stats-card div:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  input, select, button {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  button {
+    background: linear-gradient(135deg, #2575fc);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.3s;
+    margin: 5px;
+  }
+
+  button:hover { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  th, td {
+    padding: 14px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  th { background: linear-gradient(135deg, #2575fc); color: white; }
+
+  button.edit-btn { 
+    background: linear-gradient(135deg, #ffc107, #ffb300); 
+    color: white; 
+    padding: 6px 12px; 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+  }
+  button.edit-btn:hover { background: linear-gradient(135deg, #e0a800, #ffc107); }
+
+  button.remove-btn { 
+    background: linear-gradient(135deg, #dc3545, #c82333); 
+    color: white; 
+    padding: 6px 12px; 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+  }
+  button.remove-btn:hover { background: linear-gradient(135deg, #c82333, #dc3545); }
+
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Room Management</h2>
+  <div class="stats-card">
+  <div>Total Rooms: <span id="totalRooms">0</span></div>
+  <div>Vacancies: <span id="totalVacancies">0</span></div>
+</div>
+</div>
+
+
+<div class="card">
+  <h3>Add Room</h3>
+  <form id="addRoomForm">
+    <input type="number" name="roomNumber" placeholder="Room Number" required>
+    <input type="number" name="sharing" placeholder="Sharing (1-5)" min="1" max="5" required>
+    <select name="type" required>
+      <option value="">Select Type</option>
+      <option value="AC">AC</option>
+      <option value="Non-AC">Non-AC</option>
+    </select>
+    <button type="submit">Add Room</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Allocate Room to User</h3>
+  <form id="allocateRoomForm">
+    <select name="userId" id="userSelect" required>
+      <option value="">Select User</option>
+    </select>
+    <input type="number" name="roomNumber" placeholder="Room Number" required>
+    <button type="submit">Allocate Room</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Filter Rooms</h3>
+  <div id="filterSection" style="display:flex; gap:10px; justify-content:center;">
+    <select id="filterSharing">
+      <option value="">Sharing</option>
+      <option value="1">1 Sharing</option>
+      <option value="2">2 Sharing</option>
+      <option value="3">3 Sharing</option>
+      <option value="4">4 Sharing</option>
+      <option value="5">5 Sharing</option>
+    </select>
+    <select id="filterType">
+      <option value="">Type</option>
+      <option value="AC">AC</option>
+      <option value="Non-AC">Non-AC</option>
+    </select>
+    <button id="filterBtn">Apply Filter</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Rooms List</h3>
+  <table id="roomTable">
+    <thead>
+      <tr>
+        <th>Room Number</th>
+        <th>Type</th>
+        <th>Sharing</th>
+        <th>Occupants</th>
+        <th>Vacancy</th>
+        <th>Edit</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+async function loadRooms(filter = {}) {
+  let url = '/rooms';
+  if (Object.keys(filter).length) url = '/rooms/filter?' + new URLSearchParams(filter);
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const rooms = data.rooms || [];
+
+  // Update Total Rooms and Vacancies dynamically
+  document.getElementById('totalRooms').textContent = rooms.length;
+  const totalVacancies = rooms.reduce((acc, room) => acc + (room.sharing - room.occupants.length), 0);
+  document.getElementById('totalVacancies').textContent = totalVacancies;
+
+  const tbody = document.querySelector('#roomTable tbody');
+  tbody.innerHTML = '';
+
+  rooms.forEach(room => {
+    const occupantsHtml = room.occupants.map(u => u.name).join('<br>') || 'None';
+    const removeBtns = room.occupants.map(u => 
+      `<button class="remove-btn" onclick="removeUser('${room._id}','${u._id}')">Remove</button>`
+    ).join('<br>') || '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${room.roomNumber}</td>
+      <td>${room.type}</td>
+      <td>${room.sharing}</td>
+      <td>${occupantsHtml}</td>
+      <td>${room.sharing - room.occupants.length}</td>
+      <td><button class="edit-btn" onclick="editRoom('${room._id}')">Edit</button></td>
+      <td>${removeBtns}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Add Room
+document.getElementById('addRoomForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('/rooms/add', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(formData)
+  });
+  const data = await res.json();
+  if (data.success) { loadRooms(); e.target.reset(); } 
+  else alert(data.message);
+});
+
+// Allocate Room
+document.getElementById('allocateRoomForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('/rooms/allocate', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(formData)
+  });
+  const data = await res.json();
+  if(data.success){ loadRooms(); loadUsers(); e.target.reset(); } 
+  else alert(data.message);
+});
+
+// Filter Rooms
+document.getElementById('filterBtn').addEventListener('click', () => {
+  const filter = {};
+  const sharing = document.getElementById('filterSharing').value;
+  const type = document.getElementById('filterType').value;
+  if(sharing) filter.sharing = sharing;
+  if(type) filter.type = type;
+  loadRooms(filter);
+});
+
+// Load users
+async function loadUsers(){
+  const res = await fetch('/users');
+  const users = await res.json();
+  const select = document.getElementById('userSelect');
+  select.innerHTML = '<option value="">Select User</option>';
+  users.forEach(u => {
+    const opt = document.createElement('option'); 
+    opt.value = u._id; 
+    opt.textContent = u.name;
+    select.appendChild(opt);
+  });
+}
+
+// Edit Room
+async function editRoom(roomId){
+  const newSharing = prompt('Enter new sharing (1-5):');
+  const newType = prompt('Enter room type (AC/Non-AC):');
+  if(!newSharing || !newType) return;
+
+  const res = await fetch(`/rooms/edit/${roomId}`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({sharing:Number(newSharing),type:newType})
+  });
+  const data = await res.json();
+  if(data.success) loadRooms();
+}
+
+// Remove User from Room
+async function removeUser(roomId, userId){
+  if(!confirm('Remove this user?')) return;
+  const res = await fetch(`/rooms/removeUser/${roomId}/${userId}`,{ method:'PUT' });
+  const data = await res.json();
+  if(data.success){ loadRooms(); loadUsers(); } 
+  else alert(data.message);
+}
+
+// Initial load
+loadRooms();
+loadUsers();
+</script>
+
+</body>
+</html>

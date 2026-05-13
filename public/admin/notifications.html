@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Notifications</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+  }
+
+  h2 {
+  text-align: center;
+  font-size: 2rem;        /* Increased font size */
+  font-weight: 700;       /* Bolder font weight */
+  margin-bottom: 15px;
+  background: linear-gradient(90deg, #2575fc, #6a11cb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+}
+
+
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 96%;
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Caption styling */
+  .caption {
+    font-weight: 700;
+    font-size: 1.4rem; /* Increased font size */
+    margin-bottom: 12px;
+    color: #0713b7;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    border-left: 4px solid #6a11cb;
+    padding-left: 8px;
+  }
+
+  /* Add spacing between cards */
+  .card + .card {
+    margin-top: 20px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-weight: 500;
+  }
+
+  input, select, textarea, button {
+    padding: 10px;
+    margin-top:10px ;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  textarea {
+    resize: none;
+    height: 100px;
+  }
+
+  button {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-top: 20px;
+  }
+
+  button:hover {
+    opacity: 0.9;
+    transform: scale(1.01);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    flex: 1;
+    overflow-y: auto;
+    display: block;
+  }
+
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+  }
+
+  tbody {
+    display: block;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    word-wrap: break-word;
+  }
+
+  tr:hover td {
+    background: #f8f9ff;
+  }
+
+  @media(max-width:768px){
+    table, thead, tbody, tr, th, td {
+      display: block;
+    }
+    th, td {
+      text-align: left;
+    }
+    tbody {
+      max-height: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="card">
+  <h2>Admin Notifications</h2>
+  <div class="caption">Send General Notification</div>
+  <form id="notificationForm">
+    <label>Title</label>
+    <input type="text" name="title" placeholder="Enter title" required>
+
+    <label>Message</label>
+    <textarea name="message" placeholder="Enter message" required></textarea>
+
+    <label>Type</label>
+    <select name="type" required>
+      <option value="">Select Type</option>
+      <option value="Info">Info</option>
+      <option value="Warning">Warning</option>
+      <option value="Alert">Alert</option>
+    </select>
+
+    <button type="submit">Send Notification</button>
+  </form>
+</div>
+
+<div class="card" style="height:50vh;">
+  <div class="caption">Sent Notifications</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Message</th>
+        <th>Type</th>
+        <th>Sent At</th>
+      </tr>
+    </thead>
+    <tbody id="notifTable">
+      <tr><td colspan="4">Loading notifications...</td></tr>
+    </tbody>
+  </table>
+</div>
+<script>
+document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(e.target));
+  formData.isGeneral = true; // always general
+
+  // fallback type if not selected
+  if(!formData.type) formData.type = 'General';
+
+  try {
+    const res = await fetch('/admin/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('Notification sent successfully!');
+      e.target.reset();
+      loadNotifications(); // refresh table
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Failed to send notification: ' + err.message);
+  }
+});
+
+async function loadNotifications() {
+  try {
+    const res = await fetch('/admin/notifications/all');
+    const data = await res.json();
+    const tbody = document.getElementById('notifTable');
+    tbody.innerHTML = '';
+
+    if (data.success && data.notifications.length > 0) {
+      data.notifications.forEach(n => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${n.title}</td>
+          <td>${n.message}</td>
+          <td>${n.type || 'General'}</td>
+          <td>${new Date(n.createdAt).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4">No notifications found</td></tr>';
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Failed to load notifications: ' + err.message);
+  }
+}
+
+// Load notifications on page load
+loadNotifications();
+</script>
+
+
+</body>
+</html>

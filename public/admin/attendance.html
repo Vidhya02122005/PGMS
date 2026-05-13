@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PGMS Admin Attendance</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+/* Full height flex layout */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main container grows to fill available space */
+.main-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    margin: 30px;
+}
+
+/* Main Card maximized */
+.attendance-card {
+    background: rgba(255,255,255,0.95);
+    color: #1a2a6c;
+    border-radius: 15px;
+    width: 98vw;
+    max-width: 1600px; /* bigger max width */
+    height: 98%;        /* fill more height */
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+}
+
+/* Hide scrollbars */
+.attendance-card::-webkit-scrollbar { width: 0; background: transparent; }
+.attendance-card { -ms-overflow-style: none; scrollbar-width: none; }
+
+h2 {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: -webkit-linear-gradient(#2575fc, #6a11cb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+p.description {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn-checkin, .btn-checkout {
+    border: none;
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 150px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+}
+.btn-checkin { background: linear-gradient(45deg, #2575fc, #6a11cb); color:#fff; }
+.btn-checkin:hover { background: linear-gradient(45deg,#1a5ce6,#550ebf); transform: scale(1.05); }
+.btn-checkout { background: linear-gradient(45deg,#00c6ff,#0072ff); color:#fff; }
+.btn-checkout:hover { background: linear-gradient(45deg,#00b0e6,#005fd1); transform: scale(1.05); }
+
+/* Table */
+table {
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    background: #fdfdfd;
+}
+
+/* Table header: solid blue and white text */
+table thead th {
+    background-color: #2575fc !important; /* solid blue */
+    color: #fff !important;               /* white text */
+    text-transform: uppercase;
+    padding: 14px;
+}
+
+tbody tr:nth-child(even) { background-color: #f4f6fb; }
+tbody tr:hover { background-color: #dde4f0; }
+
+caption { caption-side: top; text-align:center; font-weight:600; color:#1a2a6c; padding-bottom:10px; }
+</style>
+</head>
+
+<body>
+<div class="main-container">
+    <div class="attendance-card">
+        <h2>Admin Attendance Tracker</h2>
+        <p class="description">Monitor and manage daily attendance records of all registered users.</p>
+
+        <!-- User Dropdown -->
+        <div class="mb-3">
+            <label for="userSelect" class="form-label">Select User:</label>
+            <select id="userSelect" class="form-select">
+                <option value="">-- Select User --</option>
+            </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="text-center mb-4 d-flex justify-content-center flex-wrap gap-3">
+            <button id="checkInBtn" class="btn btn-checkin">Check In</button>
+            <button id="checkOutBtn" class="btn btn-checkout">Check Out</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="row g-2 mb-4">
+            <div class="col-md-4"><input type="text" id="filterInput" class="form-control" placeholder="Search by user name..."></div>
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select">
+                    <option value="all">All</option>
+                    <option value="completed"> Completed</option>
+                    <option value="pending"> Pending Checkout</option>
+                </select>
+            </div>
+            <div class="col-md-2"><input type="date" id="fromDate" class="form-control"></div>
+            <div class="col-md-2"><input type="date" id="toDate" class="form-control"></div>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered caption-top align-middle text-center" id="attendanceTable">
+                <caption>Attendance Records Overview</caption>
+                <thead>
+                    <tr><th>User</th><th>Check In Date & Time</th><th>Check Out Date & Time</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <p class="text-center text-muted mt-3">
+             Completed – Users who have both check-in and check-out entries.<br>
+             Pending – Users who have checked in but not checked out yet.
+        </p>
+    </div>
+</div>
+
+<script>
+    const userSelect = document.getElementById('userSelect');
+    const checkInBtn = document.getElementById('checkInBtn');
+    const checkOutBtn = document.getElementById('checkOutBtn');
+    const attendanceTableBody = document.querySelector('#attendanceTable tbody');
+
+    const filterInput = document.getElementById('filterInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
+
+    let attendanceRecords = [];
+
+    async function loadUsers() {
+        try {
+            const res = await fetch('/api/users');
+            const users = await res.json();
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user._id;
+                option.textContent = user.name;
+                userSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function loadAttendance() {
+        try {
+            const res = await fetch('/api/attendance/admin/all');
+            attendanceRecords = await res.json();
+            renderAttendance();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function renderAttendance() {
+        const filterText = filterInput.value.toLowerCase();
+        const status = statusFilter.value;
+        const from = fromDate.value ? new Date(fromDate.value + 'T00:00:00') : null;
+        const to = toDate.value ? new Date(toDate.value + 'T23:59:59') : null;
+
+        attendanceTableBody.innerHTML = '';
+
+        attendanceRecords.forEach(record => {
+            const userName = record.user.name.toLowerCase();
+            const checkInDate = new Date(record.checkIn);
+            const checkOutDate = record.checkOut ? new Date(record.checkOut) : null;
+
+            let statusMatch = true;
+            if (status === 'completed') statusMatch = !!record.checkOut;
+            else if (status === 'pending') statusMatch = !record.checkOut;
+
+            let dateMatch = true;
+            if (from && checkInDate < from) dateMatch = false;
+            if (to && checkInDate > to) dateMatch = false;
+
+            const nameMatch = userName.includes(filterText);
+
+            if (statusMatch && dateMatch && nameMatch) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${record.user.name}</td>
+                    <td>${checkInDate.toLocaleString()}</td>
+                    <td>${checkOutDate ? checkOutDate.toLocaleString() : '-'}</td>
+                `;
+                attendanceTableBody.appendChild(tr);
+            }
+        });
+    }
+
+    filterInput.addEventListener('keyup', renderAttendance);
+    statusFilter.addEventListener('change', renderAttendance);
+    fromDate.addEventListener('change', renderAttendance);
+    toDate.addEventListener('change', renderAttendance);
+
+    checkInBtn.addEventListener('click', async () => {
+        const userId = userSelect.value;
+        if (!userId) return alert('Select a user first!');
+        try {
+            const res = await fetch('/api/attendance/checkin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+            const data = await res.json();
+            if (!res.ok && data.message) throw new Error(data.message);
+            loadAttendance();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    checkOutBtn.addEventListener('click', async () => {
+        const userId = userSelect.value;
+        if (!userId) return alert('Select a user first!');
+        try {
+            const res = await fetch('/api/attendance/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+            const data = await res.json();
+            if (!res.ok && data.message) throw new Error(data.message);
+            loadAttendance();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    loadUsers();
+    loadAttendance();
+</script>
+
+</body>
+</html>
