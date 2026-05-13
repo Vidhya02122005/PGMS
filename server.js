@@ -24,12 +24,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+// Root route (ADD THIS)
+app.get("/", (req, res) => {
+  res.send("PGMS Backend is running 🚀");
+});
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your_secret_key_here',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false },
 }));
+
 
 // -------------------------./
 // MongoDB Connection
