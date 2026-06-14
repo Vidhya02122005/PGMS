@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Registration</title>
 
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-vd3c6+..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <style>
@@ -26,9 +25,16 @@
   a:hover { text-decoration: underline; }
   @media(max-width: 550px){ .register-container { padding: 30px 20px; } .register-container h2 { font-size: 28px; } }
   small { color: red; display: block; margin-top: 5px; font-size: 13px; }
+  
+  /* Centering utility for Google button container */
+  .google-signup-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    width: 100%;
+  }
 </style>
 
-<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -43,7 +49,6 @@
       <input type="text" id="phone" placeholder="Phone Number" required>
       <input type="email" id="email" placeholder="Email" required>
 
-      <!-- Password field with toggle -->
       <div class="password-wrapper">
         <input type="password" id="password" placeholder="Password" required>
         <span class="toggle-password" onclick="togglePassword()">
@@ -81,15 +86,23 @@
     <a href="change-password.html">Change Password</a>
   </p>
 
-  <!-- Google Sign-In -->
   <div id="g_id_onload"
        data-client_id="52594048310-8379ttue39id6u6g0flisg8vetlrmtdc.apps.googleusercontent.com"
-       data-context="signin"
+       data-context="signup"
        data-ux_mode="popup"
        data-callback="handleCredentialResponse"
        data-auto_prompt="false">
   </div>
-  <div class="g_id_signin" data-type="standard"></div>
+  <div class="google-signup-wrapper">
+    <div class="g_id_signin" 
+         data-type="standard" 
+         data-shape="skewed" 
+         data-theme="outline" 
+         data-text="signup_with" 
+         data-size="large" 
+         data-logo_alignment="left">
+    </div>
+  </div>
 </div>
 
 <script>
