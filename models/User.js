@@ -20,7 +20,11 @@ const userSchema = new mongoose.Schema({
 
     faceData: { type: [Number], default: [] }, 
     googleId: { type: String }, // Google UID
-    photo: { type: String } // Google profile picture
+    photo: { type: String }, // Google profile picture
+    
+    // ===== ADD THIS FIELD =====
+    profileImage: { type: String, default: null } // User uploaded profile photo (base64)
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

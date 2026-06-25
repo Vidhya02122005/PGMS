@@ -2,201 +2,1167 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PGMS Admin Complaints</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Admin Complaints | PGMS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* Full height flex layout */
-body, html {
-    height: 100%;
+  * {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-}
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-/* Main container fills full screen */
-.main-container {
-    flex: 1;
-    display: flex;
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f2f8;
+    color: #1e293b;
+    overflow: hidden;
+  }
+
+  /* Mobile Menu Button */
+  .menu-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
     justify-content: center;
-    align-items: flex-start;
-    padding: 10px;
-}
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
 
-/* Card maximized */
-.card {
-    background: rgba(255,255,255,0.95);
-    color: #1a2a6c;
-    border-radius: 15px;
-    width: 100%;
-    height: 100%;
-    max-width: 1600px;
-    padding: 20px;
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    overflow-x: auto;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-}
+    padding: 30px 20px;
+    position: fixed;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-/* Gradient Headings */
-h2 {
+  .sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .sidebar-inner::-webkit-scrollbar {
+    width: 4px;
+  }
+  .sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .sidebar h2 {
     text-align: center;
-    font-weight: 700;
-    margin-bottom: 10px;
-    background: -webkit-linear-gradient(#2575fc, #6a11cb);
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-}
+    flex-shrink: 0;
+  }
 
-p.description {
+  .profile {
     text-align: center;
-    color: #333;
     margin-bottom: 20px;
-}
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
 
-/* Table */
-table {
-    border-radius: 12px;
-    overflow: hidden;
-    width: 100%;
-    background: #fdfdfd;
-}
-/* Ensure table header background and text color override Bootstrap */
-table thead th {
-    background-color: #2575fc !important; /* Solid blue */
-    color: #fff !important;               /* White text */
-    text-transform: uppercase;
-    padding: 14px;
-}
+  .profile img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #60a5fa;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
 
-tbody tr:nth-child(even) { background-color: #f4f6fb; }
-tbody tr:hover { background-color: #dde4f0; }
-caption {
-    caption-side: top;
-    text-align: center;
+  .profile h3 { 
+    font-size: 1.1rem; 
     font-weight: 600;
-    color:#1a2a6c;
-    padding-bottom:10px;
-}
+    color: #e2e8f0;
+  }
 
-/* Dropdown */
-select {
-    padding: 8px 14px;
-    border: 1px solid #2575fc;
-    border-radius: 6px;
-    background: #eef3ff;
-    color: #2575fc;
+  .profile p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .nav-links {
+    list-style: none;
+    flex: 1;
+    padding: 0 4px 8px 0;
+  }
+
+  .nav-links li { margin-bottom: 4px; }
+
+  .nav-links li a {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
     font-weight: 500;
+    font-size: 15px;
+  }
+
+  .nav-links li a i {
+    width: 22px;
+    font-size: 17px;
+  }
+
+  .nav-links li a:hover { 
+    background: rgba(96, 165, 250, 0.08); 
+    color: #e2e8f0; 
+  }
+
+  .nav-links li a.active { 
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+    color: white; 
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+
+  /* Analytics button special style */
+  .nav-links li a.analytics-link {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+    margin-top: 6px;
+  }
+
+  .nav-links li a.analytics-link:hover {
+    background: rgba(231, 76, 60, 0.2);
+  }
+
+  /* Overlay for mobile */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(4px);
+  }
+
+  .overlay.active {
+    display: block;
+  }
+
+  /* Main Content */
+  .content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 30px 40px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #f0f2f8;
+  }
+
+  .content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .content::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  /* Page Header */
+  .page-header {
+    margin-bottom: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .page-header p {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card h3 {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  /* Charts Row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .chart-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    height: 200px;
+  }
+
+  .chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Filter Card */
+  .filter-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .filter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .filter-header i {
+    font-size: 20px;
+    color: #3b82f6;
+  }
+
+  .filter-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .filter-group select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+    background: white;
+  }
+
+  .filter-btn {
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-select:hover {
-    background: #e0eaff;
-    border-color: #1e63e9;
-}
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-/* Status colors */
-.status {
-    font-weight: bold;
-    text-transform: capitalize;
-}
-.Pending { color: #ffc107; }
-.InProgress { color: #0dcaf0; }
-.Resolved { color: #198754; }
+  /* Table Card */
+  .table-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
 
-/* Responsive */
-@media (max-width: 768px) {
-  h2 { font-size: 1.5rem; }
-  th, td { padding: 10px; font-size: 14px; }
-  select { width: 100%; }
-}
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .table-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .refresh-btn {
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Mobile Cards */
+  .mobile-cards {
+    display: none;
+  }
+
+  .complaint-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 12px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s;
+  }
+
+  .complaint-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+
+  .complaint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .complaint-user {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .complaint-email {
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-Pending {
+    background: #fed7aa;
+    color: #92400e;
+  }
+
+  .status-InProgress {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-Resolved {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .complaint-text {
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f8fafc;
+    border-radius: 10px;
+  }
+
+  .complaint-date {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .complaint-status-update {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .complaint-status-update select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+  }
+
+  /* Desktop Table */
+  .desktop-table {
+    display: block;
+  }
+
+  .complaints-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .complaints-table th,
+  .complaints-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .complaints-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  .complaints-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  .status-select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-state i {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 2001;
+    display: none;
+  }
+
+  .toast.show {
+    display: block;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (min-width: 769px) {
+    .desktop-table {
+      display: block !important;
+    }
+    .mobile-cards {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -280px;
+      top: 0;
+      z-index: 1000;
+      height: 100vh;
+      box-shadow: none;
+    }
+
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 70px 16px 30px 16px;
+      height: 100vh;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+    }
+
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
+
+    .desktop-table {
+      display: none !important;
+    }
+
+    .mobile-cards {
+      display: block !important;
+    }
+
+    .filter-group {
+      flex-direction: column;
+    }
+
+    .filter-group select {
+      width: 100%;
+    }
+
+    .filter-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 </style>
 </head>
 <body>
+  <!-- ===== SIDEBAR START ===== -->
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
 
-<div class="main-container">
-  <div class="card">
-    <h2>Admin Complaints</h2>
-    <p class="description">View and manage all complaints submitted by users.</p>
+  <div class="overlay" id="overlay"></div>
 
-    <!-- Table -->
-    <div class="table-responsive">
-      <table class="table table-bordered caption-top align-middle text-center" id="complaintsTable">
-        <caption>Complaints Overview</caption>
-        <thead>
-          <tr>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Complaint</th>
-            <th>Status</th>
-            <th>Submitted At</th>
-            <th>Update Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="6" style="text-align:center;">Loading complaints...</td></tr>
-        </tbody>
-      </table>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>ADMIN</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" id="navDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html" id="navRegistrations"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html" id="navRooms"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li><a href="attendance.html" id="navAttendance"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html" id="navNotifications"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html" class="active" id="navComplaints"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html" id="navPayments"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html" id="navMealplan"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="analytics.html" class="analytics-link" id="navAnalytics"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
     </div>
   </div>
-</div>
+  <!-- ===== SIDEBAR END ===== -->
+
+  <!-- ===== MAIN CONTENT START ===== -->
+  <div class="content">
+    <div class="page-header">
+      <h1>Complaints Management</h1>
+      <p>View, track, and manage user complaints</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #3b82f6;">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <h3>Total Complaints</h3>
+        <div class="stat-value" id="totalComplaints">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fed7aa; color: #ea580c;">
+          <i class="fas fa-clock"></i>
+        </div>
+        <h3>Pending</h3>
+        <div class="stat-value" id="pendingCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #0dcaf0;">
+          <i class="fas fa-spinner"></i>
+        </div>
+        <h3>In Progress</h3>
+        <div class="stat-value" id="inProgressCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Resolved</h3>
+        <div class="stat-value" id="resolvedCount">0</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3><i class="fas fa-chart-pie"></i> Complaint Status Distribution</h3>
+        <div class="chart-wrapper">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3><i class="fas fa-chart-line"></i> Weekly Trend</h3>
+        <div class="chart-wrapper">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-card">
+      <div class="filter-header">
+        <i class="fas fa-filter"></i>
+        <h3>Filter Complaints</h3>
+      </div>
+      <div class="filter-group">
+        <select id="filterStatus">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="InProgress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <button class="filter-btn" id="filterBtn">
+          <i class="fas fa-search"></i> Apply Filter
+        </button>
+        <button class="filter-btn" id="resetBtn" onclick="resetFilter()" style="background: #64748b;">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Complaints List -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-list"></i> All Complaints</h3>
+        <button class="refresh-btn" onclick="loadComplaints()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+
+      <!-- Desktop Table View -->
+      <div class="desktop-table">
+        <div class="table-wrapper" style="overflow-x: auto;">
+          <table class="complaints-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Complaint</th>
+                <th>Status</th>
+                <th>Submitted At</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="complaintsTable">
+              <tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile Cards View -->
+      <div id="mobileCards" class="mobile-cards"></div>
+    </div>
+  </div>
+  <!-- ===== MAIN CONTENT END ===== -->
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
 <script>
-async function loadComplaints() {
-  const tbody = document.querySelector('#complaintsTable tbody');
-  try {
-    const res = await fetch('/admin/complaints/data', { cache: 'no-store' });
-    if (!res.ok) throw new Error('Network response not ok');
-    const data = await res.json();
-    tbody.innerHTML = '';
+// ===== SIDEBAR JAVASCRIPT =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 
-    if (!data.success || !Array.isArray(data.complaints) || data.complaints.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No complaints found</td></tr>';
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+if (menuToggle) {
+  menuToggle.addEventListener('click', openMenu);
+}
+if (overlay) {
+  overlay.addEventListener('click', closeMenu);
+}
+
+// Close menu when clicking a link (mobile)
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// Highlight active page
+const currentPage = window.location.pathname.split('/').pop();
+document.querySelectorAll('.nav-links a').forEach(link => {
+  const href = link.getAttribute('href');
+  if (href === currentPage) {
+    link.classList.add('active');
+  }
+});
+
+// ===== COMPLAINTS JAVASCRIPT =====
+let complaintsData = [];
+let statusChart = null;
+let trendChart = null;
+
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#ef4444' : '#10b981';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Load Complaints
+async function loadComplaints(filterStatus = '') {
+  const tbody = document.getElementById('complaintsTable');
+  const mobileContainer = document.getElementById('mobileCards');
+  
+  tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+  mobileContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+  try {
+    let url = '/admin/complaints/data';
+    const res = await fetch(url, { cache: 'no-store' });
+    
+    if (res.status === 401) {
+      showToast('Session expired. Please login again.', true);
+      setTimeout(() => {
+        window.location.href = 'admin-login.html';
+      }, 2000);
       return;
     }
+    
+    const data = await res.json();
 
-    data.complaints.forEach(c => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${c.userId?.name || '-'}</td>
-        <td>${c.userId?.email || '-'}</td>
-        <td style="text-align:left; max-width:400px;">${c.complaint}</td>
-        <td class="status ${c.status}">${c.status}</td>
-        <td>${new Date(c.createdAt).toLocaleString()}</td>
-        <td>
-          <select data-id="${c._id}">
-            <option value="Pending" ${c.status==='Pending'?'selected':''}>Pending</option>
-            <option value="InProgress" ${c.status==='InProgress'?'selected':''}>In Progress</option>
-            <option value="Resolved" ${c.status==='Resolved'?'selected':''}>Resolved</option>
-          </select>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    tbody.querySelectorAll('select[data-id]').forEach(sel => {
-      sel.addEventListener('change', async e => {
-        const id = e.target.dataset.id;
-        const status = e.target.value;
-        await fetch(`/admin/complaints/${encodeURIComponent(id)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status })
-        });
-        loadComplaints();
-      });
-    });
-  } catch {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Error loading complaints</td></tr>';
+    if (data.success && data.complaints) {
+      complaintsData = data.complaints;
+      
+      // Apply filter
+      let filteredData = complaintsData;
+      if (filterStatus) {
+        filteredData = complaintsData.filter(c => c.status === filterStatus);
+      }
+      
+      updateStats();
+      updateCharts();
+      renderDesktopTable(filteredData);
+      renderMobileCards(filteredData);
+    } else {
+      showEmptyState();
+    }
+  } catch (err) {
+    console.error(err);
+    showError('Error loading complaints');
   }
 }
 
-window.addEventListener('DOMContentLoaded', loadComplaints);
-</script>
+function updateStats() {
+  const total = complaintsData.length;
+  const pending = complaintsData.filter(c => c.status === 'Pending').length;
+  const inProgress = complaintsData.filter(c => c.status === 'InProgress').length;
+  const resolved = complaintsData.filter(c => c.status === 'Resolved').length;
 
+  document.getElementById('totalComplaints').innerHTML = total;
+  document.getElementById('pendingCount').innerHTML = pending;
+  document.getElementById('inProgressCount').innerHTML = inProgress;
+  document.getElementById('resolvedCount').innerHTML = resolved;
+}
+
+function updateCharts() {
+  const pending = complaintsData.filter(c => c.status === 'Pending').length;
+  const inProgress = complaintsData.filter(c => c.status === 'InProgress').length;
+  const resolved = complaintsData.filter(c => c.status === 'Resolved').length;
+
+  // Status Distribution Chart
+  const ctx1 = document.getElementById('statusChart').getContext('2d');
+  if (statusChart) statusChart.destroy();
+  statusChart = new Chart(ctx1, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'In Progress', 'Resolved'],
+      datasets: [{
+        data: [pending, inProgress, resolved],
+        backgroundColor: ['#f59e0b', '#0dcaf0', '#10b981'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { 
+          position: 'bottom', 
+          labels: { font: { size: 11 } } 
+        } 
+      }
+    }
+  });
+
+  // Weekly Trend (last 7 days)
+  const last7Days = [];
+  const dailyCount = {};
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    last7Days.push(dateStr);
+    dailyCount[dateStr] = 0;
+  }
+
+  complaintsData.forEach(complaint => {
+    const date = new Date(complaint.createdAt);
+    const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    if (dailyCount[dateStr] !== undefined) {
+      dailyCount[dateStr]++;
+    }
+  });
+
+  const trendData = last7Days.map(day => dailyCount[day] || 0);
+
+  const ctx2 = document.getElementById('trendChart').getContext('2d');
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: last7Days,
+      datasets: [{
+        label: 'Complaints',
+        data: trendData,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { 
+          position: 'bottom', 
+          labels: { font: { size: 11 } } 
+        } 
+      },
+      scales: { 
+        y: { 
+          beginAtZero: true, 
+          ticks: { stepSize: 1 } 
+        } 
+      }
+    }
+  });
+}
+
+function renderDesktopTable(data) {
+  const tbody = document.getElementById('complaintsTable');
+  
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No complaints found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(complaint => `
+    <tr>
+      <td><strong>${escapeHtml(complaint.userId?.name || '-')}</strong></td>
+      <td>${escapeHtml(complaint.userId?.email || '-')}</td>
+      <td style="max-width: 400px;">${escapeHtml(complaint.complaint)}</td>
+      <td>
+        <span class="status-badge status-${complaint.status}">${complaint.status}</span>
+       </td>
+      <td>${formatDate(complaint.createdAt)}</td>
+      <td>
+        <select class="status-select" data-id="${complaint._id}">
+          <option value="Pending" ${complaint.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option value="InProgress" ${complaint.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
+          <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+        </select>
+       </td>
+    </tr>
+  `).join('');
+
+  // Add event listeners to status selects
+  document.querySelectorAll('.status-select[data-id]').forEach(sel => {
+    sel.addEventListener('change', async e => {
+      const id = e.target.dataset.id;
+      const status = e.target.value;
+      await updateStatus(id, status);
+    });
+  });
+}
+
+function renderMobileCards(data) {
+  const container = document.getElementById('mobileCards');
+  
+  if (!data.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-comment-slash"></i>
+        <h4>No Complaints</h4>
+        <p>No complaints found matching your criteria.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = data.map(complaint => `
+    <div class="complaint-card">
+      <div class="complaint-header">
+        <div>
+          <div class="complaint-user">${escapeHtml(complaint.userId?.name || '-')}</div>
+          <div class="complaint-email">${escapeHtml(complaint.userId?.email || '-')}</div>
+        </div>
+        <span class="status-badge status-${complaint.status}">${complaint.status}</span>
+      </div>
+      <div class="complaint-text">
+        <i class="fas fa-quote-left" style="color:#94a3b8; margin-right:6px;"></i>
+        ${escapeHtml(complaint.complaint)}
+      </div>
+      <div class="complaint-date">
+        <i class="fas fa-calendar-alt"></i> ${formatDate(complaint.createdAt)}
+      </div>
+      <div class="complaint-status-update">
+        <select class="status-select-mobile" data-id="${complaint._id}">
+          <option value="Pending" ${complaint.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option value="InProgress" ${complaint.status === 'InProgress' ? 'selected' : ''}>In Progress</option>
+          <option value="Resolved" ${complaint.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+        </select>
+      </div>
+    </div>
+  `).join('');
+
+  // Add event listeners to mobile status selects
+  document.querySelectorAll('.status-select-mobile[data-id]').forEach(sel => {
+    sel.addEventListener('change', async e => {
+      const id = e.target.dataset.id;
+      const status = e.target.value;
+      await updateStatus(id, status);
+    });
+  });
+}
+
+async function updateStatus(id, status) {
+  try {
+    const res = await fetch(`/admin/complaints/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Status updated successfully!');
+      loadComplaints(document.getElementById('filterStatus').value);
+    } else {
+      showToast(data.message || 'Update failed', true);
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error updating status', true);
+  }
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-IN', { 
+    day: '2-digit', 
+    month: 'short', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function showEmptyState() {
+  document.getElementById('complaintsTable').innerHTML = '<tr><td colspan="6" class="empty-state">No complaints found</td></tr>';
+  document.getElementById('mobileCards').innerHTML = `
+    <div class="empty-state">
+      <i class="fas fa-comment-slash"></i>
+      <h4>No Complaints</h4>
+      <p>No complaints have been submitted yet.</p>
+    </div>
+  `;
+}
+
+function showError(message) {
+  document.getElementById('complaintsTable').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:#ef4444;">${message}</td></tr>`;
+  document.getElementById('mobileCards').innerHTML = `<div class="empty-state" style="color:#ef4444;">${message}</div>`;
+}
+
+// Filter function
+document.getElementById('filterBtn')?.addEventListener('click', () => {
+  const status = document.getElementById('filterStatus').value;
+  loadComplaints(status);
+});
+
+function resetFilter() {
+  document.getElementById('filterStatus').value = '';
+  loadComplaints('');
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+  loadComplaints(document.getElementById('filterStatus').value);
+}, 30000);
+
+// Initial load
+loadComplaints();
+</script>
 </body>
 </html>

@@ -2,132 +2,694 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes"/>
+<title>Admin Dashboard | PGMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  }
 
   body {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, #ffffff, #ffffff);
-    color: #1a2a6c;
+    background: #f0f2f8;
+    color: #1e293b;
+    overflow: hidden; /* Prevent body scroll */
   }
 
-  /* Sidebar */
+  /* Mobile Menu Button */
+  .menu-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* Sidebar - Smooth, no scroll */
   .sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #1a49b0, #6a11cb);
-    color: #fff;
+    width: 280px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
     padding: 30px 20px;
     position: fixed;
+    height: 100vh;
+    overflow: hidden; /* No scroll on sidebar */
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Sidebar inner wrapper for smooth scrolling if needed */
+  .sidebar-inner {
+    display: flex;
+    flex-direction: column;
     height: 100%;
     overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .sidebar-inner::-webkit-scrollbar {
+    width: 4px;
+  }
+  .sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
   }
 
   .sidebar h2 {
     text-align: center;
-    font-size: 1.8rem;
-    margin-bottom: 30px;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
     letter-spacing: 1px;
-
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
   }
 
   .profile {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
   }
 
   .profile img {
-    width: 90px;
-    height: 90px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    border: 3px solid #fff;
-    margin-bottom: 10px;
+    border: 3px solid #60a5fa;
+    margin-bottom: 8px;
+    object-fit: cover;
   }
 
-  .profile h3 { font-size:1.2rem; font-weight:600; }
+  .profile h3 { 
+    font-size: 1.1rem; 
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  .profile p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
 
   .nav-links {
     list-style: none;
-    flex-grow: 1;
+    flex: 1;
+    padding: 0 4px 8px 0;
   }
 
-  .nav-links li { margin-bottom: 20px; }
+  .nav-links li { margin-bottom: 4px; }
 
   .nav-links li a {
-    text-decoration:none;
-    color: #cbd5e1;
-    display: block;
-    padding:12px 15px;
-    border-radius:10px;
-    transition: all 0.3s;
-    font-weight:500;
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+    font-weight: 500;
+    font-size: 15px; /* Increased from 13px */
   }
 
-  .nav-links li a:hover { background: rgba(255,255,255,0.15); color:#fff; }
-  .nav-links li a.active { background: #fff; color:#2575fc; font-weight:600; }
+  .nav-links li a i {
+    width: 22px;
+    font-size: 17px; /* Increased from 15px */
+  }
 
-  /* Content */
+  .nav-links li a:hover { 
+    background: rgba(96, 165, 250, 0.08); 
+    color: #e2e8f0; 
+  }
+
+  .nav-links li a.active { 
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+    color: white; 
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+
+  /* Analytics button special style */
+  .nav-links li a.analytics-link {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+    margin-top: 6px;
+  }
+
+  .nav-links li a.analytics-link:hover {
+    background: rgba(231, 76, 60, 0.2);
+  }
+
+  /* Overlay for mobile */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(4px);
+  }
+
+  .overlay.active {
+    display: block;
+  }
+
+  /* Content - Scrollable */
   .content {
     flex-grow: 1;
-    margin-left: 260px;
-    padding: 40px 20px;
-    min-height: 100vh;
+    margin-left: 280px;
+    padding: 30px 40px;
+    height: 100vh;
     overflow-y: auto;
+    background: #f0f2f8;
+  }
+
+  .content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .content::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
   }
 
   h1.caption {
-    font-weight:700;
-    font-size:1.6rem;
-    margin-bottom:10px;
-    color:#0713b7;
-    text-shadow:1px 1px 2px rgba(0,0,0,0.2);
-    border-left:4px solid #6a11cb;
-    padding-left:8px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+    color: #0f172a;
+    border-left: 4px solid #3b82f6;
+    padding-left: 16px;
   }
 
-  p {
-    font-size:1rem;
-    color:#1a2a6c;
-    margin-bottom:15px;
+  .welcome-text {
+    color: #64748b;
+    margin-bottom: 28px;
+    font-size: 14px;
   }
 
-  @media (max-width:768px){
-    .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; overflow-x:auto; padding:15px;}
-    .content{ margin-left:0; padding:20px; }
-    .nav-links{ display:flex; flex-direction:row; gap:10px; }
-    .profile{ display:none; }
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .action-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    display: block;
+  }
+
+  .action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1);
+  }
+
+  .action-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px auto;
+  }
+
+  .action-icon i {
+    font-size: 22px;
+    color: white;
+  }
+
+  .action-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .action-card p {
+    font-size: 11px;
+    color: #64748b;
+  }
+
+  /* Recent Activity */
+  .recent-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+  }
+
+  .recent-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .recent-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .recent-header a {
+    font-size: 12px;
+    color: #3b82f6;
+    text-decoration: none;
+  }
+
+  .activity-list {
+    padding: 0 20px;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .activity-details {
+    flex: 1;
+  }
+
+  .activity-title {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 13px;
+  }
+
+  .activity-time {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  .activity-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 20px;
+  }
+
+  .status-pending { background: #fed7aa; color: #92400e; }
+  .status-resolved { background: #d1fae5; color: #065f46; }
+  .status-completed { background: #d1fae5; color: #065f46; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .stats-grid, .quick-actions {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -280px;
+      top: 0;
+      z-index: 1000;
+      height: 100vh;
+      box-shadow: none;
+    }
+
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 70px 16px 30px 16px;
+      height: 100vh;
+    }
+
+    .stats-grid, .quick-actions {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-number {
+      font-size: 22px;
+    }
+
+    .stat-card {
+      padding: 16px;
+    }
+
+    .action-card {
+      padding: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid, .quick-actions {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-number {
+      font-size: 18px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
   }
 </style>
 </head>
 <body>
+  <!-- Mobile Menu Button -->
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
 
-<div class="sidebar">
-  <h2>Admin Panel</h2>
-  <div class="profile">
-    <img src="profile.jpg" alt="Admin Profile">
-    <h3>VIDHYA</h3>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>ADMIN</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="/admin/analytics.html" class="analytics-link"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
+    </div>
   </div>
-  <ul class="nav-links">
-    <li><a href="registrations.html">Registrations</a></li>
-    <li><a href="rooms.html">Rooms</a></li>
-    <li><a href="attendance.html">Attendance</a></li>
-    <li><a href="notifications.html">Notifications</a></li>
-    <li><a href="complaints.html">Complaints</a></li>
-    <li><a href="payments.html">Payments</a></li>
+
+  <!-- Main Content -->
+  <div class="content">
+    <h1 class="caption">Welcome, Admin!</h1>
+    <p class="welcome-text">Manage your PGMS efficiently from this dashboard.</p>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #3b82f6;">
+          <i class="fas fa-users"></i>
+        </div>
+        <h4>Total Residents</h4>
+        <div class="stat-number" id="totalUsers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+          <i class="fas fa-door-open"></i>
+        </div>
+        <h4>Total Rooms</h4>
+        <div class="stat-number" id="totalRooms">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fed7aa; color: #ea580c;">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <h4>Pending Complaints</h4>
+        <div class="stat-number" id="pendingComplaints">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #e0e7ff; color: #6366f1;">
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+        <h4>Total Revenue</h4>
+        <div class="stat-number" id="totalRevenue">₹0</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a href="registrations.html" class="action-card">
+        <div class="action-icon"><i class="fas fa-user-plus"></i></div>
+        <h4>Add Resident</h4>
+        <p>Register new user</p>
+      </a>
+      <a href="rooms.html" class="action-card">
+        <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
+        <h4>Add Room</h4>
+        <p>Create new room</p>
+      </a>
+      <a href="payments.html" class="action-card">
+        <div class="action-icon"><i class="fas fa-rupee-sign"></i></div>
+        <h4>Record Payment</h4>
+        <p>Track transactions</p>
+      </a>
+      <a href="mealplan.html" class="action-card">
+        <div class="action-icon"><i class="fas fa-utensils"></i></div>
+        <h4>Manage Meal Plan</h4>
+        <p>Update weekly menu</p>
+      </a>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-card">
+      <div class="recent-header">
+        <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+        <a href="#">View All</a>
+      </div>
+      <div class="activity-list" id="activityList">
+        <div class="activity-item">
+          <div class="activity-icon" style="background: #dbeafe; color: #3b82f6;">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="activity-details">
+            <div class="activity-title">New user registered</div>
+            <div class="activity-time">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Mobile menu functions
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+if (menuToggle) {
+  menuToggle.addEventListener('click', openMenu);
+}
+if (overlay) {
+  overlay.addEventListener('click', closeMenu);
+}
+
+// Close menu when clicking a link (mobile)
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// Fetch dashboard stats
+async function fetchDashboardStats() {
+  try {
+    // Fetch users
+    const usersRes = await fetch('/admin/registrations');
+    const usersData = await usersRes.json();
+    if (usersData.success) {
+      document.getElementById('totalUsers').innerHTML = usersData.users.length;
+    }
+
+    // Fetch rooms
+    const roomsRes = await fetch('/rooms');
+    const roomsData = await roomsRes.json();
+    if (roomsData.success) {
+      document.getElementById('totalRooms').innerHTML = roomsData.rooms.length;
+    }
+
+    // Fetch complaints
+    const complaintsRes = await fetch('/admin/complaints/data');
+    const complaintsData = await complaintsRes.json();
+    if (complaintsData.success) {
+      const pending = complaintsData.complaints.filter(c => c.status === 'Pending').length;
+      document.getElementById('pendingComplaints').innerHTML = pending;
+    }
+
+    // Fetch payments
+    const paymentsRes = await fetch('/admin/payments');
+    const paymentsData = await paymentsRes.json();
+    if (paymentsData.success) {
+      const totalRevenue = paymentsData.payments
+        .filter(p => p.status === 'Completed')
+        .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+      document.getElementById('totalRevenue').innerHTML = `₹${totalRevenue.toLocaleString('en-IN')}`;
+    }
+
+    // Load recent activities
+    loadRecentActivities();
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+  }
+}
+
+function loadRecentActivities() {
+  const activityList = document.getElementById('activityList');
   
-  </ul>
-</div>
+  // Sample recent activities (you can replace with actual API data)
+  const activities = [
+    { type: 'user', action: 'New user registered', time: 'Just now', icon: 'fa-user-plus', color: '#dbeafe', iconColor: '#3b82f6' },
+    { type: 'payment', action: 'Payment received', time: '5 minutes ago', icon: 'fa-rupee-sign', color: '#d1fae5', iconColor: '#10b981' },
+    { type: 'complaint', action: 'New complaint submitted', time: '1 hour ago', icon: 'fa-comment-dots', color: '#fed7aa', iconColor: '#ea580c' },
+    { type: 'room', action: 'Room allocated', time: '2 hours ago', icon: 'fa-door-open', color: '#e0e7ff', iconColor: '#6366f1' }
+  ];
 
-<div class="content">
-  <h1 class="caption">Welcome, Admin!</h1>
-  <p>Select an option from the sidebar to get started.</p>
+  activityList.innerHTML = activities.map(activity => `
+    <div class="activity-item">
+      <div class="activity-icon" style="background: ${activity.color}; color: ${activity.iconColor};">
+        <i class="fas ${activity.icon}"></i>
+      </div>
+      <div class="activity-details">
+        <div class="activity-title">${activity.action}</div>
+        <div class="activity-time">${activity.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
 
-</div>
+// Auto-refresh stats every 30 seconds
+setInterval(fetchDashboardStats, 30000);
 
+// Initial load
+fetchDashboardStats();
+</script>
 </body>
 </html>

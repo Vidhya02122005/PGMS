@@ -2,153 +2,1297 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>User Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+<title>User Dashboard | PGMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  body { display:flex; min-height:100vh; background:#f5f7fa; color:#1a2a6c; }
+  /* ===== CSS VARIABLES ===== */
+  :root {
+    --primary: #6C63FF;
+    --primary-light: #8B83FF;
+    --primary-dark: #5A52D5;
+    --secondary: #FF6584;
+    --success: #2ECC71;
+    --warning: #F1C40F;
+    --danger: #E74C3C;
+    --purple: #A29BFE;
+    --pink: #FD79A8;
+    --blue: #74B9FF;
+    --cyan: #55EFC4;
+    --dark: #2D3436;
+    --dark-light: #636E72;
+    --gray: #B2BEC3;
+    --light-gray: #DFE6E9;
+    --bg: #F8F9FA;
+    --card-shadow: 0 20px 60px rgba(108, 99, 255, 0.08);
+    --card-shadow-hover: 0 30px 80px rgba(108, 99, 255, 0.15);
+    --border-radius: 24px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-  /* Sidebar */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
+  /* ===== MOBILE MENU BUTTON ===== */
+  .menu-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    background: white;
+    border: none;
+    color: var(--dark);
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    transition: var(--transition);
+  }
+
+  .menu-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  }
+
+  /* ===== SIDEBAR ===== */
   .sidebar {
-    width:260px;
-    background: linear-gradient(180deg,#1a49b0,#6a11cb);
-    color:#ffffff;
-    flex-shrink:0;
-    display:flex;
-    flex-direction:column;
-    padding:30px 20px;
-    position:fixed;
-    height:100%;
-    overflow-y:auto;
+    width: 280px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 20px;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    left: 0;
   }
-  .sidebar h2 { color:#ffffff;text-align:center; font-size:1.8rem; margin-bottom:30px; letter-spacing:1px; }
-  .nav-links { list-style:none; flex-grow:1; }
-  .nav-links li { margin-bottom:20px; }
-  .nav-links li a { text-decoration:none; color:#cbd5e1; display:block; padding:12px 15px; border-radius:10px; transition:0.3s; font-weight:500; }
-  .nav-links li a:hover { background: rgba(255,255,255,0.15); color:#fff; }
-  .nav-links li a.active { background:#fff; color:#2575fc; font-weight:600; }
 
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+  .sidebar.open { left: 0; }
+
+  /* Sidebar Header */
+  .sidebar-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sidebar-header .logo-icon {
+    font-size: 32px;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-header p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Sidebar Profile */
+  .sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar-profile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(255, 101, 132, 0.1));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .sidebar-profile:hover::before {
+    opacity: 1;
+  }
+
+  .sidebar-profile:hover {
+    border-color: rgba(108, 99, 255, 0.3);
+    transform: translateX(4px);
+  }
+
+  .sidebar-profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sidebar-profile-info {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar-profile-info .name {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-profile-info .role {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    display: block;
+  }
+
+  .sidebar-profile-arrow {
+    color: rgba(255,255,255,0.3);
+    font-size: 12px;
+    transition: var(--transition);
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar-profile:hover .sidebar-profile-arrow {
+    transform: translateX(4px);
+    color: white;
+  }
+
+  /* Nav Links */
+  .nav-links {
+    list-style: none;
+    flex-grow: 1;
+    padding: 4px 0;
+  }
+
+  .nav-links li {
+    margin-bottom: 2px;
+  }
+
+  .nav-links li a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    transition: var(--transition);
+    font-weight: 500;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .nav-links li a i {
+    width: 22px;
+    font-size: 16px;
+    transition: var(--transition);
+    color: rgba(255,255,255,0.4);
+  }
+
+  .nav-links li a:hover {
+    background: rgba(255,255,255,0.06);
+    color: white;
+    transform: translateX(4px);
+  }
+
+  .nav-links li a:hover i {
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .nav-links li a.active {
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(255, 101, 132, 0.1));
+    color: white;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+  }
+
+  .nav-links li a.active i {
+    color: var(--primary-light);
+  }
+
+  .nav-links li a.active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  }
+
+  .nav-links li a.analytics-link {
+    border: 1px solid rgba(255, 101, 132, 0.15);
+    margin-top: 6px;
+    background: rgba(255, 101, 132, 0.05);
+  }
+
+  .nav-links li a.analytics-link:hover {
+    background: rgba(255, 101, 132, 0.12);
+    border-color: rgba(255, 101, 132, 0.3);
+  }
+
+  /* Logout Button */
   .logout-btn {
-    margin-top:auto;
-    padding:12px 15px;
-    border:none;
-    border-radius:10px;
-    background:#ffffff;
-    color:#0015f9;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
+    margin-top: 8px;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255,255,255,0.6);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.05);
   }
-  .logout-btn:hover { background:#f1f1f1; }
 
-  /* Content */
-  .content { flex-grow:1; margin-left:260px; padding:40px 20px; min-height:100vh; overflow-y:auto; }
-  h1.caption { font-weight:700; font-size:2rem; margin-bottom:10px; color:#0713b7; text-shadow:1px 1px 2px rgba(0,0,0,0.2); border-left:4px solid #6a11cb; padding-left:8px; }
-  p { font-size:1rem; color:#1a2a6c; margin-bottom:15px; }
+  .logout-btn:hover {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--danger);
+    border-color: rgba(231, 76, 60, 0.2);
+    transform: translateY(-2px);
+  }
 
-  /* Meal Plan Carousel */
-  .meal-plan { margin-top:20px; }
-  .meal-plan h2 { font-size:1.8rem; color:#2575fc; margin-bottom:15px; text-align:center; }
-  .carousel-container { width:100%; max-width:700px; margin:0 auto; overflow:hidden; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.1); background:#fff; }
-  .carousel-slide { display:flex; transition: transform 0.5s ease-in-out; }
-  .carousel-item { min-width:100%; position:relative; }
-  .carousel-item img { width:100%; height:300px; object-fit:cover; border-radius:15px; }
-  .overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(30,64,175,0.8); color:#fff; padding:15px; border-bottom-left-radius:15px; border-bottom-right-radius:15px; }
-  .overlay h3 { margin:0 0 5px 0; font-size:18px; }
-  .overlay p { margin:0; font-size:14px; }
+  .logout-btn i {
+    transition: var(--transition);
+  }
 
-  .controls { display:flex; justify-content:space-between; max-width:700px; margin:10px auto 0; }
-  .btn { padding:8px 16px; background:#1e40af; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:0.3s; }
-  .btn:hover { background:#2563eb; }
+  .logout-btn:hover i {
+    transform: translateX(3px);
+  }
 
-  @media (max-width:768px){
-    .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; overflow-x:auto; padding:15px;}
-    .content{ margin-left:0; padding:20px; }
-    .nav-links{ display:flex; flex-direction:row; gap:10px; }
+  /* ===== OVERLAY ===== */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .overlay.active { display: block; }
+
+  /* ===== MAIN CONTENT ===== */
+  .content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 32px 40px;
+    min-height: 100vh;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .animate-fade { animation: fadeIn 0.6s ease forwards; }
+  .animate-slide-up { animation: slideUp 0.6s ease forwards; opacity: 0; }
+  .animate-slide-down { animation: slideDown 0.6s ease forwards; opacity: 0; }
+  .animate-scale { animation: scaleIn 0.5s ease forwards; opacity: 0; }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.10s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.20s; }
+  .delay-5 { animation-delay: 0.25s; }
+  .delay-6 { animation-delay: 0.30s; }
+
+  /* ===== WELCOME SECTION ===== */
+  .welcome-section {
+    margin-bottom: 28px;
+    padding: 24px 32px;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.05), rgba(255, 101, 132, 0.05));
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(108, 99, 255, 0.08);
+  }
+
+  .welcome-section h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.5px;
+  }
+
+  .welcome-section h1 span {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .welcome-section p {
+    color: var(--dark-light);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 22px 24px;
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover::before {
+    opacity: 1;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: rgba(108, 99, 255, 0.1);
+  }
+
+  .stat-card .stat-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover .stat-icon-wrap {
+    transform: scale(1.05) rotate(-4deg);
+  }
+
+  .stat-card h4 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dark-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.5px;
+  }
+
+  .stat-card .stat-trend {
+    font-size: 11px;
+    color: var(--dark-light);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-card .stat-trend i {
+    font-size: 12px;
+  }
+
+  .stat-card .stat-trend.up { color: var(--success); }
+  .stat-card .stat-trend.down { color: var(--danger); }
+
+  /* ===== QUICK ACTIONS ===== */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .action-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 24px 20px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transform: scaleX(0);
+    transition: var(--transition);
+    transform-origin: left;
+  }
+
+  .action-card:hover::after {
+    transform: scaleX(1);
+  }
+
+  .action-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: rgba(108, 99, 255, 0.1);
+  }
+
+  .action-card .action-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    transition: var(--transition);
+    font-size: 26px;
+    color: white;
+  }
+
+  .action-card:nth-child(1) .action-icon { background: linear-gradient(135deg, #6C63FF, #A29BFE); }
+  .action-card:nth-child(2) .action-icon { background: linear-gradient(135deg, #FF6584, #FD79A8); }
+  .action-card:nth-child(3) .action-icon { background: linear-gradient(135deg, #2ECC71, #55EFC4); }
+  .action-card:nth-child(4) .action-icon { background: linear-gradient(135deg, #F1C40F, #F9CA24); }
+
+  .action-card:hover .action-icon {
+    transform: scale(1.08) rotate(-6deg);
+  }
+
+  .action-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+
+  .action-card p {
+    font-size: 12px;
+    color: var(--dark-light);
+  }
+
+  /* ===== MEAL PLAN ===== */
+  .meal-plan {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 28px 32px;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: var(--card-shadow);
+  }
+
+  .meal-plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .meal-plan-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .meal-plan-header h3 i {
+    color: var(--warning);
+    margin-right: 10px;
+  }
+
+  .meal-plan-header a {
+    font-size: 13px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meal-plan-header a:hover {
+    color: var(--primary-dark);
+    gap: 10px;
+  }
+
+  /* Carousel */
+  .carousel-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.04);
+    position: relative;
+  }
+
+  .carousel-slide {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .carousel-item {
+    min-width: 100%;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .carousel-item img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .carousel-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: white;
+    padding: 30px 24px 20px;
+  }
+
+  .carousel-overlay h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .carousel-overlay p {
+    font-size: 13px;
+    opacity: 0.85;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .controls .btn {
+    padding: 10px 22px;
+    background: var(--dark);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .controls .btn:hover {
+    background: #1a1a2e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  }
+
+  .controls .btn:active {
+    transform: scale(0.95);
+  }
+
+  .dot-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--light-gray);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .dot:hover {
+    transform: scale(1.3);
+    background: var(--primary);
+  }
+
+  .dot.active {
+    background: var(--primary);
+    width: 28px;
+    border-radius: 10px;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--dark-light);
+    margin-top: 20px;
+  }
+
+  .footer i {
+    color: var(--primary);
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--dark);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 16px;
+    font-size: 14px;
+    z-index: 2001;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle { display: flex; }
+    .sidebar {
+      position: fixed;
+      left: -280px;
+      top: 0;
+      box-shadow: none;
+    }
+    .sidebar.open {
+      left: 0;
+      box-shadow: 20px 0 60px rgba(0,0,0,0.3);
+    }
+    .content {
+      margin-left: 0;
+      padding: 80px 16px 30px 16px;
+    }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .quick-actions { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-card { padding: 16px; }
+    .stat-number { font-size: 22px; }
+    .welcome-section { padding: 20px; }
+    .welcome-section h1 { font-size: 22px; }
+    .meal-plan { padding: 20px; }
+    .carousel-item img { height: 180px; }
+    .carousel-overlay h3 { font-size: 16px; }
+    .controls .btn { padding: 8px 16px; font-size: 12px; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .quick-actions { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card { padding: 14px; }
+    .stat-number { font-size: 18px; }
+    .stat-icon-wrap { width: 40px; height: 40px; font-size: 16px; }
+    .action-card { padding: 16px; }
+    .action-icon { width: 48px; height: 48px; font-size: 20px; }
+    .content { padding: 70px 10px 20px 10px; }
+    .carousel-item img { height: 140px; }
+    .sidebar-profile { padding: 10px 12px; }
+    .sidebar-profile-avatar { width: 38px; height: 38px; font-size: 14px; }
   }
 </style>
 </head>
 <body>
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
 
-<div class="sidebar">
-  <h2>User Panel</h2>
-  <ul class="nav-links" id="nav-links"></ul>
-  <button class="logout-btn" id="logout-btn">Logout</button>
-</div>
+  <div class="overlay" id="overlay"></div>
 
-<div class="content">
-  <h1 class="caption">Welcome, <span id="welcome-username">User</span>!</h1>
-  <p>Select an option from the sidebar to get started.</p>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+       <span class="logo-icon"><i class="fas fa-home"></i></span>
+      <h2>PGMS</h2>
+      <p>Convenience at Your Fingertips</p>
+    </div>
 
-  
-    
-    
+    <a href="profile.html" class="sidebar-profile" id="sidebarProfile">
+      <div class="sidebar-profile-avatar" id="sidebarAvatar">
+        <span id="avatarText">U</span>
+      </div>
+      <div class="sidebar-profile-info">
+        <span class="name" id="sidebarName">User</span>
+        <span class="role" id="sidebarRole">Student</span>
+      </div>
+      <i class="fas fa-chevron-right sidebar-profile-arrow"></i>
+    </a>
+
+    <ul class="nav-links" id="nav-links"></ul>
+    <button class="logout-btn" id="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
   </div>
-</div>
+
+  <div class="content">
+    <div class="welcome-section animate-slide-down">
+      <h1>Welcome back, <span id="welcome-username">User</span>! 👋</h1>
+      <p>Here's what's happening with your account today.</p>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card animate-scale delay-1">
+        <div class="stat-icon-wrap" style="background: rgba(108, 99, 255, 0.1); color: var(--primary);">
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+        <h4>Total Paid</h4>
+        <div class="stat-number" id="totalPaid">₹0</div>
+        <div class="stat-trend up"><i class="fas fa-arrow-up"></i> All time</div>
+      </div>
+      <div class="stat-card animate-scale delay-2">
+        <div class="stat-icon-wrap" style="background: rgba(255, 101, 132, 0.1); color: var(--secondary);">
+          <i class="fas fa-clock"></i>
+        </div>
+        <h4>Pending Payments</h4>
+        <div class="stat-number" id="pendingPayments">0</div>
+        <div class="stat-trend down"><i class="fas fa-clock"></i> Awaiting</div>
+      </div>
+      <div class="stat-card animate-scale delay-3">
+        <div class="stat-icon-wrap" style="background: rgba(46, 204, 113, 0.1); color: var(--success);">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h4>Complaints Resolved</h4>
+        <div class="stat-number" id="resolvedComplaints">0</div>
+        <div class="stat-trend up"><i class="fas fa-check"></i> Completed</div>
+      </div>
+      <div class="stat-card animate-scale delay-4">
+        <div class="stat-icon-wrap" style="background: rgba(241, 196, 15, 0.1); color: var(--warning);">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <h4>Attendance Rate</h4>
+        <div class="stat-number" id="attendanceRate">0%</div>
+        <div class="stat-trend up"><i class="fas fa-chart-line"></i> Last 30 days</div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="payments.html" class="action-card animate-scale delay-2">
+        <div class="action-icon"><i class="fas fa-rupee-sign"></i></div>
+        <h4>Make Payment</h4>
+        <p>Pay your dues</p>
+      </a>
+      <a href="complaints.html" class="action-card animate-scale delay-3">
+        <div class="action-icon"><i class="fas fa-comment-dots"></i></div>
+        <h4>Raise Complaint</h4>
+        <p>Report an issue</p>
+      </a>
+      <a href="attendance.html" class="action-card animate-scale delay-4">
+        <div class="action-icon"><i class="fas fa-calendar-check"></i></div>
+        <h4>Mark Attendance</h4>
+        <p>Check-in/out</p>
+      </a>
+      <a href="analytics.html" class="action-card animate-scale delay-5">
+        <div class="action-icon"><i class="fas fa-chart-pie"></i></div>
+        <h4>My Analytics</h4>
+        <p>View insights</p>
+      </a>
+    </div>
+
+    <div class="meal-plan animate-slide-up delay-4">
+      <div class="meal-plan-header">
+        <h3><i class="fas fa-utensils"></i> Today's Meal Plan</h3>
+        <a href="mealplan.html">View Full Week →</a>
+      </div>
+
+      <div class="carousel-container">
+        <div class="carousel-slide" id="carouselSlide"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="prevBtn"><i class="fas fa-chevron-left"></i> Previous</button>
+        <button class="btn" id="nextBtn">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+
+      <div class="dot-indicators" id="dotIndicators"></div>
+    </div>
+
+    <div class="footer">
+      <p><i class="fas fa-crown"></i> PGMS - Paying Guest Management System</p>
+    </div>
+  </div>
 
 <script>
+  // ===== NAVIGATION LINKS =====
   const studentLinks = [
-    { name: 'Attendance', href: 'attendance.html' },
-    { name: 'Complaints', href: 'complaints.html' },
-    { name: 'Notifications', href: 'notifications.html' },
-    { name: 'Payments', href: 'payments.html' },
-    { name: 'Rooms', href: 'rooms.html' },
-    { name: 'Meal Plan', href: 'mealplan.html' }
+    { name: 'Dashboard', href: 'dashboard.html', icon: 'fas fa-tachometer-alt' },
+    { name: 'Attendance', href: 'attendance.html', icon: 'fas fa-calendar-check' },
+    { name: 'Complaints', href: 'complaints.html', icon: 'fas fa-comment-dots' },
+    { name: 'Notifications', href: 'notifications.html', icon: 'fas fa-bell' },
+    { name: 'Payments', href: 'payments.html', icon: 'fas fa-chart-line' },
+    { name: 'Rooms', href: 'rooms.html', icon: 'fas fa-door-open' },
+    { name: 'Meal Plan', href: 'mealplan.html', icon: 'fas fa-utensils' },
+    { name: 'Analytics', href: 'analytics.html', icon: 'fas fa-chart-pie' }
   ];
 
   const adminLinks = [
-    { name: 'Registrations', href: 'registrations.html' },
-    { name: 'Rooms', href: 'rooms.html' },
-    { name: 'Attendance', href: 'attendance.html' },
-    { name: 'Notifications', href: 'notifications.html' },
-    { name: 'Complaints', href: 'complaints.html' },
-    { name: 'Payments', href: 'payments.html' },
-    { name: 'Meal Plan', href: 'mealplan.html' }
+    { name: 'Dashboard', href: 'dashboard.html', icon: 'fas fa-tachometer-alt' },
+    { name: 'Registrations', href: 'registrations.html', icon: 'fas fa-users' },
+    { name: 'Rooms', href: 'rooms.html', icon: 'fas fa-door-open' },
+    { name: 'Attendance', href: 'attendance.html', icon: 'fas fa-calendar-check' },
+    { name: 'Notifications', href: 'notifications.html', icon: 'fas fa-bell' },
+    { name: 'Complaints', href: 'complaints.html', icon: 'fas fa-comment-dots' },
+    { name: 'Payments', href: 'payments.html', icon: 'fas fa-chart-line' },
+    { name: 'Meal Plan', href: 'mealplan.html', icon: 'fas fa-utensils' },
+    { name: 'Analytics', href: 'analytics.html', icon: 'fas fa-chart-pie' }
   ];
 
-  // Sidebar links and username
-  fetch('/users/me')
-    .then(res => res.ok ? res.json() : Promise.reject('Not logged in'))
-    .then(data => {
-      const username = data.name || 'Guest';
-      const role = data.role || 'student';
-      document.getElementById('welcome-username').textContent = username;
+  // ===== MOBILE MENU =====
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  function openMenu() {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (menuToggle) menuToggle.addEventListener('click', openMenu);
+  if (overlay) overlay.addEventListener('click', closeMenu);
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 768 && e.target.closest('.nav-links a')) {
+      closeMenu();
+    }
+  });
+
+  // ===== TOAST =====
+  function showToast(message, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.background = isError ? '#E74C3C' : '#2D3436';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // ===== LOAD DASHBOARD =====
+  let currentUser = null;
+  let mealPlanData = [];
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch('/users/me');
+      if (!res.ok) throw new Error('Not logged in');
+      const data = await res.json();
+      currentUser = data;
+
+      updateSidebarProfile(data);
+      document.getElementById('welcome-username').textContent = data.name || 'User';
+
+      // Setup navigation
       const nav = document.getElementById('nav-links');
+      const role = data.role || 'student';
       const links = role === 'admin' ? adminLinks : studentLinks;
-      links.forEach(link => {
+      nav.innerHTML = '';
+      links.forEach((link, index) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = link.href;
-        a.textContent = link.name;
-        if(window.location.pathname.includes(link.href)) a.classList.add('active');
+        a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
+        a.style.animationDelay = `${0.05 * (index + 1)}s`;
+        if (window.location.pathname.includes(link.href.split('.')[0])) {
+          a.classList.add('active');
+        }
         li.appendChild(a);
         nav.appendChild(li);
       });
-    })
-    .catch(err => console.error(err));
 
-  // Logout
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    fetch('/user/logout', { method:'POST' })
-      .then(res => res.json())
-      .then(data => data.success ? window.location.reload() : alert('Logout failed'))
-      .catch(err => console.error(err));
+      await Promise.all([
+        loadUserStats(data),
+        loadMealPlan()
+      ]);
+
+    } catch (err) {
+      console.error(err);
+      window.location.href = 'login.html';
+    }
+  }
+
+  function updateSidebarProfile(user) {
+    const name = user.name || 'User';
+    const role = user.role || 'Student';
+    const avatarText = name.charAt(0).toUpperCase();
+
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = role;
+    document.getElementById('avatarText').textContent = avatarText;
+
+    if (user.profileImage) {
+      document.getElementById('sidebarAvatar').innerHTML = `<img src="${user.profileImage}" alt="${name}">`;
+    }
+  }
+
+  async function loadUserStats(user) {
+    try {
+      const paymentsRes = await fetch(`/user/payments/${user._id}`);
+      const paymentsData = await paymentsRes.json();
+      if (paymentsData.success) {
+        const payments = paymentsData.payments;
+        const completed = payments.filter(p => p.status === 'Completed');
+        const pending = payments.filter(p => p.status === 'Pending');
+        const totalPaid = completed.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+        
+        animateNumber('totalPaid', totalPaid, '₹');
+        document.getElementById('pendingPayments').textContent = pending.length;
+      }
+
+      const complaintsRes = await fetch('/user/complaints');
+      const complaintsData = await complaintsRes.json();
+      if (complaintsData.success) {
+        const resolved = complaintsData.complaints.filter(c => c.status === 'Resolved').length;
+        document.getElementById('resolvedComplaints').textContent = resolved;
+      }
+
+      const attendanceRes = await fetch(`/attendance/user/${user._id}`);
+      const records = await attendanceRes.json();
+      if (Array.isArray(records)) {
+        const last30Days = records.slice(0, 30);
+        const presentDays = last30Days.filter(r => r.checkOut).length;
+        const rate = last30Days.length > 0 ? ((presentDays / last30Days.length) * 100).toFixed(0) : 0;
+        document.getElementById('attendanceRate').textContent = `${rate}%`;
+      }
+
+    } catch (err) {
+      console.error('Error loading stats:', err);
+    }
+  }
+
+  function animateNumber(elementId, targetValue, prefix = '') {
+    const element = document.getElementById(elementId);
+    const duration = 1000;
+    const startTime = performance.now();
+    const isCurrency = prefix === '₹';
+
+    function updateValue(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const currentValue = targetValue * eased;
+      
+      if (isCurrency) {
+        element.textContent = `₹${Math.round(currentValue).toLocaleString('en-IN')}`;
+      } else {
+        element.textContent = Math.round(currentValue);
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateValue);
+      } else {
+        if (isCurrency) {
+          element.textContent = `₹${targetValue.toLocaleString('en-IN')}`;
+        } else {
+          element.textContent = targetValue;
+        }
+      }
+    }
+    requestAnimationFrame(updateValue);
+  }
+
+  async function loadMealPlan() {
+    try {
+      const res = await fetch('/api/mealplan');
+      const data = await res.json();
+      if (data.success && data.mealPlans) {
+        mealPlanData = data.mealPlans;
+        renderMealCarousel();
+      }
+    } catch (err) {
+      console.error('Error loading meal plan:', err);
+    }
+  }
+
+  function renderMealCarousel() {
+    const slideContainer = document.getElementById('carouselSlide');
+    const dotContainer = document.getElementById('dotIndicators');
+    
+    if (!mealPlanData || mealPlanData.length === 0) {
+      slideContainer.innerHTML = `
+        <div class="carousel-item">
+          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=260&fit=crop" alt="Meal">
+          <div class="carousel-overlay">
+            <h3>🍽️ Meal Plan</h3>
+            <p>No meal plan available</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const today = days[new Date().getDay()];
+    let todayMeal = mealPlanData.find(m => m.day === today);
+    if (!todayMeal) todayMeal = mealPlanData[0];
+
+    const mealOrder = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+    const mealKeys = ['breakfast', 'lunch', 'snacks', 'dinner'];
+    const mealIcons = ['🌅', '🍛', '☕', '🌙'];
+    const mealImages = [
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=260&fit=crop',
+      'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&h=260&fit=crop',
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=260&fit=crop',
+      'https://images.unsplash.com/photo-1585937421612-70a008356cbe?w=800&h=260&fit=crop'
+    ];
+
+    slideContainer.innerHTML = mealKeys.map((key, index) => `
+      <div class="carousel-item">
+        <img src="${mealImages[index]}" alt="${mealOrder[index]}">
+        <div class="carousel-overlay">
+          <h3>${mealIcons[index]} ${mealOrder[index]}</h3>
+          <p>${todayMeal[key] || 'Not available'}</p>
+        </div>
+      </div>
+    `).join('');
+
+    dotContainer.innerHTML = mealKeys.map((_, index) => `
+      <span class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>
+    `).join('');
+
+    initCarousel();
+  }
+
+  // ===== CAROUSEL =====
+  let currentIndex = 0;
+  let autoSlideInterval;
+
+  function initCarousel() {
+    const slideContainer = document.getElementById('carouselSlide');
+    const dots = document.querySelectorAll('.dot');
+    const totalItems = document.querySelectorAll('.carousel-item').length;
+
+    if (totalItems === 0) return;
+
+    function goToSlide(index) {
+      currentIndex = index;
+      slideContainer.style.transform = `translateX(${-currentIndex * 100}%)`;
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    const newPrevBtn = prevBtn.cloneNode(true);
+    const newNextBtn = nextBtn.cloneNode(true);
+    prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+    nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+
+    newPrevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+      goToSlide(currentIndex);
+      resetAutoSlide();
+    });
+
+    newNextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % totalItems;
+      goToSlide(currentIndex);
+      resetAutoSlide();
+    });
+
+    dots.forEach((dot) => {
+      dot.addEventListener('click', () => {
+        const index = parseInt(dot.dataset.index);
+        goToSlide(index);
+        resetAutoSlide();
+      });
+    });
+
+    startAutoSlide();
+  }
+
+  function startAutoSlide() {
+    const totalItems = document.querySelectorAll('.carousel-item').length;
+    if (totalItems <= 1) return;
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = setInterval(() => {
+      const nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) nextBtn.click();
+    }, 5000);
+  }
+
+  function resetAutoSlide() {
+    clearInterval(autoSlideInterval);
+    startAutoSlide();
+  }
+
+  // ===== LOGOUT =====
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+      const res = await fetch('/user/logout', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = 'login.html';
+      } else {
+        showToast('Logout failed', true);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Error logging out', true);
+    }
   });
 
-  // Meal Carousel
-  const carouselSlide = document.getElementById('carouselSlide');
-  const carouselItems = document.querySelectorAll('.carousel-item');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  let counter = 0;
-  function updateCarousel() {
-    carouselSlide.style.transform = `translateX(${-counter * 100}%)`;
-  }
-  nextBtn.addEventListener('click', () => { counter = (counter + 1) % carouselItems.length; updateCarousel(); });
-  prevBtn.addEventListener('click', () => { counter = (counter - 1 + carouselItems.length) % carouselItems.length; updateCarousel(); });
-  setInterval(() => { nextBtn.click(); }, 5000);
-</script>
+  // ===== INITIALIZE =====
+  loadDashboard();
 
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.id = 'toast';
+  toast.className = 'toast';
+  document.body.appendChild(toast);
+</script>
 </body>
 </html>

@@ -2,316 +2,540 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Room Management - Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Room Management | PGMS Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #333;
-  }
-
-  .card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    padding: 15px 25px;
-    margin-bottom: 10px;
-  }
-
-  h2 {
-    text-align: center;
-    font-size: 2.2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 20px;
-  }
-  .stats-card {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 30px;
-}
-
-.stats-card div {
-  background: linear-gradient(135deg, #6a11cb, #2575fc);
-  color:  #fbfdff;
-  padding: 25px 35px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.3rem;
-  text-align: center;
-  min-width: 180px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.stats-card div:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  input, select, button {
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  button {
-    background: linear-gradient(135deg, #2575fc);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-weight: 700;
-    transition: 0.3s;
-    margin: 5px;
-  }
-
-  button:hover { background: linear-gradient(135deg, #6a11cb, #2575fc); }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-
-  th, td {
-    padding: 14px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-  }
-
-  th { background: linear-gradient(135deg, #2575fc); color: white; }
-
-  button.edit-btn { 
-    background: linear-gradient(135deg, #ffc107, #ffb300); 
-    color: white; 
-    padding: 6px 12px; 
-    border: none; 
-    border-radius: 6px; 
-    cursor: pointer; 
-  }
-  button.edit-btn:hover { background: linear-gradient(135deg, #e0a800, #ffc107); }
-
-  button.remove-btn { 
-    background: linear-gradient(135deg, #dc3545, #c82333); 
-    color: white; 
-    padding: 6px 12px; 
-    border: none; 
-    border-radius: 6px; 
-    cursor: pointer; 
-  }
-  button.remove-btn:hover { background: linear-gradient(135deg, #c82333, #dc3545); }
-
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Inter', sans-serif; background: #f0f2f8; color: #1e293b; overflow: hidden; }
+  .menu-toggle { position: fixed; top: 12px; left: 12px; z-index: 1001; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; color: white; width: 44px; height: 44px; border-radius: 12px; font-size: 20px; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .sidebar { width: 280px; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; flex-shrink: 0; display: flex; flex-direction: column; padding: 30px 20px; position: fixed; height: 100vh; overflow: hidden; z-index: 1000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .sidebar-inner { display: flex; flex-direction: column; height: 100%; overflow-y: auto; padding-right: 4px; }
+  .sidebar-inner::-webkit-scrollbar { width: 4px; }
+  .sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+  .sidebar h2 { text-align: center; font-size: 1.6rem; margin-bottom: 20px; letter-spacing: 1px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0; }
+  .profile { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .profile img { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #60a5fa; margin-bottom: 8px; object-fit: cover; }
+  .profile h3 { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
+  .profile p { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+  .nav-links { list-style: none; flex: 1; padding: 0 4px 8px 0; }
+  .nav-links li { margin-bottom: 4px; }
+  .nav-links li a { text-decoration: none; color: #94a3b8; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 10px; transition: all 0.25s ease; font-weight: 500; font-size: 15px; }
+  .nav-links li a i { width: 22px; font-size: 17px; }
+  .nav-links li a:hover { background: rgba(96, 165, 250, 0.08); color: #e2e8f0; }
+  .nav-links li a.active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .nav-links li a.analytics-link { background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); margin-top: 6px; }
+  .nav-links li a.analytics-link:hover { background: rgba(231, 76, 60, 0.2); }
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; backdrop-filter: blur(4px); }
+  .overlay.active { display: block; }
+  .content { flex-grow: 1; margin-left: 280px; padding: 30px 40px; height: 100vh; overflow-y: auto; background: #f0f2f8; }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  .page-header { margin-bottom: 20px; }
+  .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .page-header p { color: #64748b; font-size: 13px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; }
+  .stat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 12px auto; }
+  .stat-card h3 { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; }
+  .card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 20px; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .card-header h3 { font-size: 18px; font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+  .card-body { padding: 20px; }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 13px; font-weight: 600; color: #64748b; }
+  .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; transition: all 0.3s; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .btn { padding: 10px 20px; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+  .btn-success { background: #10b981; color: white; }
+  .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+  .btn-danger { background: #ef4444; color: white; }
+  .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
+  .btn-warning { background: #f59e0b; color: white; }
+  .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(245,158,11,0.3); }
+  .btn-secondary { background: #64748b; color: white; }
+  .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(100,116,139,0.3); }
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { background: #f8fafc; font-weight: 600; color: #64748b; font-size: 12px; }
+  tr:hover td { background: #f8fafc; }
+  .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .badge-ac { background: #dbeafe; color: #1e40af; }
+  .badge-nonac { background: #e2e8f0; color: #475569; }
+  .badge-vacancy { background: #d1fae5; color: #065f46; }
+  .badge-full { background: #fee2e2; color: #991b1b; }
+  .loading { text-align: center; padding: 40px; color: #94a3b8; }
+  .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 2001; display: none; }
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+  .modal-overlay.active { display: flex; }
+  .modal-content { background: white; border-radius: 24px; padding: 30px; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto; animation: modalPop 0.3s ease; }
+  @keyframes modalPop { from { opacity: 0; transform: scale(0.95) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
+  .modal-header h2 { font-size: 22px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+  .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+  .modal-close:hover { color: #ef4444; transform: rotate(90deg); }
+  .room-check-status { font-size: 12px; margin-top: 4px; padding: 4px 8px; border-radius: 6px; display: inline-block; }
+  .room-check-status.success { color: #10b981; }
+  .room-check-status.error { color: #ef4444; }
+  .room-check-status.warning { color: #f59e0b; }
+  .room-check-status.info { color: #94a3b8; }
+  @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 768px) { .menu-toggle { display: flex; } .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; box-shadow: none; } .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.2); } .content { margin-left: 0; padding: 70px 16px 30px 16px; height: 100vh; } .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } .form-row { grid-template-columns: 1fr; } .modal-content { padding: 20px; } }
 </style>
 </head>
 <body>
-
-<div class="card">
-  <h2>Room Management</h2>
-  <div class="stats-card">
-  <div>Total Rooms: <span id="totalRooms">0</span></div>
-  <div>Vacancies: <span id="totalVacancies">0</span></div>
-</div>
-</div>
-
-
-<div class="card">
-  <h3>Add Room</h3>
-  <form id="addRoomForm">
-    <input type="number" name="roomNumber" placeholder="Room Number" required>
-    <input type="number" name="sharing" placeholder="Sharing (1-5)" min="1" max="5" required>
-    <select name="type" required>
-      <option value="">Select Type</option>
-      <option value="AC">AC</option>
-      <option value="Non-AC">Non-AC</option>
-    </select>
-    <button type="submit">Add Room</button>
-  </form>
-</div>
-
-<div class="card">
-  <h3>Allocate Room to User</h3>
-  <form id="allocateRoomForm">
-    <select name="userId" id="userSelect" required>
-      <option value="">Select User</option>
-    </select>
-    <input type="number" name="roomNumber" placeholder="Room Number" required>
-    <button type="submit">Allocate Room</button>
-  </form>
-</div>
-
-<div class="card">
-  <h3>Filter Rooms</h3>
-  <div id="filterSection" style="display:flex; gap:10px; justify-content:center;">
-    <select id="filterSharing">
-      <option value="">Sharing</option>
-      <option value="1">1 Sharing</option>
-      <option value="2">2 Sharing</option>
-      <option value="3">3 Sharing</option>
-      <option value="4">4 Sharing</option>
-      <option value="5">5 Sharing</option>
-    </select>
-    <select id="filterType">
-      <option value="">Type</option>
-      <option value="AC">AC</option>
-      <option value="Non-AC">Non-AC</option>
-    </select>
-    <button id="filterBtn">Apply Filter</button>
+  <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+  <div class="overlay" id="overlay"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>ADMIN</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html" class="active"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="analytics.html" class="analytics-link"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
+    </div>
   </div>
-</div>
 
-<div class="card">
-  <h3>Rooms List</h3>
-  <table id="roomTable">
-    <thead>
-      <tr>
-        <th>Room Number</th>
-        <th>Type</th>
-        <th>Sharing</th>
-        <th>Occupants</th>
-        <th>Vacancy</th>
-        <th>Edit</th>
-        <th>Remove</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+  <div class="content">
+    <div class="page-header">
+      <h1>Room Management</h1>
+      <p>Manage rooms, allocate residents, and track occupancy</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-icon" style="background:#dbeafe;color:#3b82f6;"><i class="fas fa-door-open"></i></div><h3>Total Rooms</h3><div class="stat-value" id="totalRooms">0</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#d1fae5;color:#10b981;"><i class="fas fa-user-check"></i></div><h3>Occupied</h3><div class="stat-value" id="occupiedRooms">0</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#fee2e2;color:#ef4444;"><i class="fas fa-user-times"></i></div><h3>Vacant</h3><div class="stat-value" id="vacantRooms">0</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:#e0e7ff;color:#6366f1;"><i class="fas fa-percentage"></i></div><h3>Occupancy Rate</h3><div class="stat-value" id="occupancyRate">0%</div></div>
+    </div>
+
+    <!-- Add Room Form -->
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-plus-circle"></i> Add New Room</h3></div>
+      <div class="card-body">
+        <form id="addRoomForm" class="form-row">
+          <div class="form-group"><label><i class="fas fa-hashtag"></i> Room Number</label><input type="text" id="roomNumber" placeholder="e.g., 101, A-201" required></div>
+          <div class="form-group"><label><i class="fas fa-user-friends"></i> Sharing Capacity</label>
+            <select id="sharing" required>
+              <option value="1">1 (Single)</option><option value="2">2 (Double)</option>
+              <option value="3">3 (Triple)</option><option value="4">4 (Quad)</option>
+              <option value="6">6 (Dormitory)</option>
+            </select>
+          </div>
+          <div class="form-group"><label><i class="fas fa-thermometer-half"></i> Room Type</label>
+            <select id="roomType" required><option value="AC">AC</option><option value="Non-AC">Non-AC</option></select>
+          </div>
+          <div class="form-group" style="justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Room</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Allocate Room - Separate Section -->
+    <div class="card">
+      <div class="card-header"><h3><i class="fas fa-user-plus"></i> Allocate Room to User</h3></div>
+      <div class="card-body">
+        <form id="allocateForm" class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Select User</label>
+            <select id="allocateUser" required>
+              <option value="">-- Select User --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-door-open"></i> Select Room</label>
+            <select id="allocateRoom" required>
+              <option value="">-- Select Room --</option>
+            </select>
+          </div>
+          <div class="form-group" style="justify-content: flex-end;">
+            <button type="submit" class="btn btn-success" id="allocateBtn"><i class="fas fa-check"></i> Allocate</button>
+          </div>
+        </form>
+        <div id="roomStatusCheck" class="room-check-status info" style="margin-top:10px;">
+          <i class="fas fa-info-circle"></i> Select a user and room to allocate
+        </div>
+      </div>
+    </div>
+
+    <!-- Rooms List -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="fas fa-list"></i> All Rooms</h3>
+        <button class="btn btn-secondary" onclick="fetchRooms()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Room</th><th>Type</th><th>Capacity</th><th>Occupants</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="roomsTable"><tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading rooms...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Room Details -->
+  <div class="modal-overlay" id="roomModal">
+    <div class="modal-content">
+      <div class="modal-header"><h2><i class="fas fa-door-open"></i> Room Details</h2><button class="modal-close" id="closeModal">&times;</button></div>
+      <div id="modalBody"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
 <script>
-async function loadRooms(filter = {}) {
-  let url = '/rooms';
-  if (Object.keys(filter).length) url = '/rooms/filter?' + new URLSearchParams(filter);
+// ===== SIDEBAR =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 
-  const res = await fetch(url);
-  const data = await res.json();
+function openMenu() { sidebar.classList.add('open'); overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeMenu() { sidebar.classList.remove('open'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (overlay) overlay.addEventListener('click', closeMenu);
 
-  const rooms = data.rooms || [];
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => { if (window.innerWidth < 768) closeMenu(); });
+});
 
-  // Update Total Rooms and Vacancies dynamically
-  document.getElementById('totalRooms').textContent = rooms.length;
-  const totalVacancies = rooms.reduce((acc, room) => acc + (room.sharing - room.occupants.length), 0);
-  document.getElementById('totalVacancies').textContent = totalVacancies;
+// ===== TOAST =====
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#ef4444' : '#10b981';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
 
-  const tbody = document.querySelector('#roomTable tbody');
-  tbody.innerHTML = '';
+// ===== FETCH ROOMS =====
+async function fetchRooms() {
+  const tbody = document.getElementById('roomsTable');
+  tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading rooms...</td></tr>';
+  try {
+    const res = await fetch('/rooms');
+    const data = await res.json();
+    if (data.success && data.rooms) {
+      renderRooms(data.rooms);
+      updateStats(data.rooms);
+      populateUserDropdown();
+      populateRoomDropdown(data.rooms);
+    } else {
+      showToast('Error loading rooms', true);
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Failed to load rooms</td></tr>';
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error loading rooms', true);
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Error loading rooms. Please refresh.</td></tr>';
+  }
+}
 
-  rooms.forEach(room => {
-    const occupantsHtml = room.occupants.map(u => u.name).join('<br>') || 'None';
-    const removeBtns = room.occupants.map(u => 
-      `<button class="remove-btn" onclick="removeUser('${room._id}','${u._id}')">Remove</button>`
-    ).join('<br>') || '—';
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${room.roomNumber}</td>
-      <td>${room.type}</td>
+// ===== RENDER ROOMS =====
+function renderRooms(rooms) {
+  const tbody = document.getElementById('roomsTable');
+  if (!rooms || rooms.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No rooms available. Add a room to get started.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rooms.map(room => {
+    const occupantCount = room.occupants?.length || 0;
+    const isFull = occupantCount >= room.sharing;
+    const vacancyCount = room.sharing - occupantCount;
+    const typeBadge = room.type === 'AC' ? '<span class="badge badge-ac">AC</span>' : '<span class="badge badge-nonac">Non-AC</span>';
+    const statusBadge = isFull ? '<span class="badge badge-full">Full</span>' : `<span class="badge badge-vacancy">${vacancyCount} Vacant</span>`;
+    const occupantNames = room.occupants?.map(o => o.name).join(', ') || 'No occupants';
+    return `<tr>
+      <td><strong>${room.roomNumber}</strong></td>
+      <td>${typeBadge}</td>
       <td>${room.sharing}</td>
-      <td>${occupantsHtml}</td>
-      <td>${room.sharing - room.occupants.length}</td>
-      <td><button class="edit-btn" onclick="editRoom('${room._id}')">Edit</button></td>
-      <td>${removeBtns}</td>
-    `;
-    tbody.appendChild(tr);
+      <td><div style="font-size:13px;">${occupantNames}<br><small style="color:#94a3b8;">${occupantCount}/${room.sharing}</small></div></td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-warning" style="padding:6px 12px; font-size:12px;" onclick="viewRoom('${room._id}')"><i class="fas fa-eye"></i></button>
+        ${occupantCount === 0 ? `<button class="btn btn-danger" style="padding:6px 12px; font-size:12px;" onclick="deleteRoom('${room._id}')"><i class="fas fa-trash"></i></button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== UPDATE STATS =====
+function updateStats(rooms) {
+  const total = rooms.length;
+  let occupied = 0, totalCapacity = 0, totalOccupants = 0;
+  rooms.forEach(room => {
+    const occupantCount = room.occupants?.length || 0;
+    if (occupantCount > 0) occupied++;
+    totalCapacity += room.sharing;
+    totalOccupants += occupantCount;
+  });
+  const vacant = total - occupied;
+  const occupancyRate = totalCapacity > 0 ? ((totalOccupants / totalCapacity) * 100).toFixed(1) : 0;
+  document.getElementById('totalRooms').textContent = total;
+  document.getElementById('occupiedRooms').textContent = occupied;
+  document.getElementById('vacantRooms').textContent = vacant;
+  document.getElementById('occupancyRate').textContent = `${occupancyRate}%`;
+}
+
+// ===== POPULATE USER DROPDOWN =====
+async function populateUserDropdown() {
+  try {
+    const res = await fetch('/users/without-room');
+    let users = await res.json();
+    const select = document.getElementById('allocateUser');
+    select.innerHTML = '<option value="">-- Select User --</option>';
+    if (Array.isArray(users) && users.length > 0) {
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user._id;
+        option.textContent = `${user.name} (${user.email || 'No email'})`;
+        select.appendChild(option);
+      });
+    } else {
+      const fallbackRes = await fetch('/users');
+      const allUsers = await fallbackRes.json();
+      if (Array.isArray(allUsers)) {
+        allUsers.forEach(user => {
+          const option = document.createElement('option');
+          option.value = user._id;
+          const hasRoom = user.room ? ' ❌ (Has Room)' : ' ✅ (No Room)';
+          option.textContent = `${user.name}${hasRoom}`;
+          select.appendChild(option);
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching users:', err);
+  }
+}
+
+// ===== POPULATE ROOM DROPDOWN =====
+function populateRoomDropdown(rooms) {
+  const select = document.getElementById('allocateRoom');
+  select.innerHTML = '<option value="">-- Select Room --</option>';
+  if (!rooms || rooms.length === 0) {
+    select.innerHTML = '<option value="">-- No rooms available --</option>';
+    return;
+  }
+  // Show only rooms with vacancy
+  const availableRooms = rooms.filter(room => (room.occupants?.length || 0) < room.sharing);
+  if (availableRooms.length === 0) {
+    select.innerHTML = '<option value="">-- All rooms are full --</option>';
+    return;
+  }
+  availableRooms.forEach(room => {
+    const option = document.createElement('option');
+    option.value = room.roomNumber;
+    const occupantCount = room.occupants?.length || 0;
+    option.textContent = `${room.roomNumber} (${occupantCount}/${room.sharing} ${room.type})`;
+    select.appendChild(option);
   });
 }
 
-// Add Room
-document.getElementById('addRoomForm').addEventListener('submit', async e => {
+// ===== ALLOCATE ROOM =====
+document.getElementById('allocateForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = Object.fromEntries(new FormData(e.target));
-  const res = await fetch('/rooms/add', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(formData)
-  });
-  const data = await res.json();
-  if (data.success) { loadRooms(); e.target.reset(); } 
-  else alert(data.message);
+  
+  const userId = document.getElementById('allocateUser').value;
+  const roomNumber = document.getElementById('allocateRoom').value;
+  const statusSpan = document.getElementById('roomStatusCheck');
+
+  if (!userId) {
+    statusSpan.innerHTML = '❌ Please select a user';
+    statusSpan.className = 'room-check-status error';
+    showToast('Please select a user', true);
+    return;
+  }
+
+  if (!roomNumber) {
+    statusSpan.innerHTML = '❌ Please select a room';
+    statusSpan.className = 'room-check-status error';
+    showToast('Please select a room', true);
+    return;
+  }
+
+  const submitBtn = document.getElementById('allocateBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Allocating...';
+
+  try {
+    const res = await fetch('/rooms/allocate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, roomNumber })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      statusSpan.innerHTML = `✅ Room ${roomNumber} allocated successfully!`;
+      statusSpan.className = 'room-check-status success';
+      showToast(`✅ Room ${roomNumber} allocated successfully!`);
+      document.getElementById('allocateUser').value = '';
+      document.getElementById('allocateRoom').value = '';
+      fetchRooms();
+    } else {
+      statusSpan.innerHTML = `❌ ${data.message || 'Error allocating room'}`;
+      statusSpan.className = 'room-check-status error';
+      showToast(data.message || 'Error allocating room', true);
+    }
+  } catch (err) {
+    console.error(err);
+    statusSpan.innerHTML = '❌ Error allocating room. Please try again.';
+    statusSpan.className = 'room-check-status error';
+    showToast('Error allocating room', true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-check"></i> Allocate';
+  }
 });
 
-// Allocate Room
-document.getElementById('allocateRoomForm').addEventListener('submit', async e => {
+// ===== ADD ROOM =====
+document.getElementById('addRoomForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const formData = Object.fromEntries(new FormData(e.target));
-  const res = await fetch('/rooms/allocate', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(formData)
-  });
-  const data = await res.json();
-  if(data.success){ loadRooms(); loadUsers(); e.target.reset(); } 
-  else alert(data.message);
+  const roomNumber = document.getElementById('roomNumber').value.trim();
+  const sharing = parseInt(document.getElementById('sharing').value);
+  const type = document.getElementById('roomType').value;
+  if (!roomNumber) { showToast('Please enter a room number', true); return; }
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+  try {
+    const res = await fetch('/rooms/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomNumber, sharing, type })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ Room ${roomNumber} added successfully!`);
+      document.getElementById('roomNumber').value = '';
+      fetchRooms();
+    } else {
+      showToast(data.message || 'Error adding room', true);
+    }
+  } catch (err) {
+    showToast('Error adding room. Please try again.', true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-plus"></i> Add Room';
+  }
 });
 
-// Filter Rooms
-document.getElementById('filterBtn').addEventListener('click', () => {
-  const filter = {};
-  const sharing = document.getElementById('filterSharing').value;
-  const type = document.getElementById('filterType').value;
-  if(sharing) filter.sharing = sharing;
-  if(type) filter.type = type;
-  loadRooms(filter);
+// ===== VIEW ROOM DETAILS =====
+async function viewRoom(roomId) {
+  const modal = document.getElementById('roomModal');
+  const body = document.getElementById('modalBody');
+  modal.classList.add('active');
+  body.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading room details...</div>';
+  try {
+    const res = await fetch('/rooms');
+    const data = await res.json();
+    if (data.success) {
+      const room = data.rooms.find(r => r._id === roomId);
+      if (room) {
+        body.innerHTML = `<div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;">Room Number</span><span style="font-weight:700;">${room.roomNumber}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;">Type</span><span style="font-weight:700;">${room.type}</span></div>
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;">Capacity</span><span style="font-weight:700;">${room.sharing} persons</span></div>
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #e2e8f0;"><span style="color:#64748b;">Occupants</span><span style="font-weight:700;">${room.occupants?.length || 0}</span></div>
+          <div style="padding:12px 0;"><span style="color:#64748b;">Occupant Names</span>
+            <ul style="margin-top:8px; list-style:none; padding:0;">
+              ${room.occupants?.map(o => `<li style="padding:6px 12px; background:#f8fafc; border-radius:8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+                <span>${o.name}</span>
+                <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="removeUserFromRoom('${room._id}', '${o._id}', '${o.name}')"><i class="fas fa-user-minus"></i></button>
+              </li>`).join('') || '<li style="color:#94a3b8;">No occupants</li>'}
+            </ul>
+          </div>
+        </div>`;
+      }
+    }
+  } catch (err) {
+    body.innerHTML = '<div class="empty-state">Error loading room details</div>';
+  }
+}
+
+// ===== REMOVE USER FROM ROOM =====
+async function removeUserFromRoom(roomId, userId, userName) {
+  if (!confirm(`Remove ${userName} from this room?`)) return;
+  try {
+    const res = await fetch(`/rooms/removeUser/${roomId}/${userId}`, { method: 'PUT' });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ ${userName} removed from room successfully!`);
+      fetchRooms();
+      const modal = document.getElementById('roomModal');
+      if (modal.classList.contains('active')) viewRoom(roomId);
+    } else {
+      showToast(data.message || 'Error removing user', true);
+    }
+  } catch (err) {
+    showToast('Error removing user', true);
+  }
+}
+
+// ===== DELETE ROOM =====
+async function deleteRoom(roomId) {
+  if (!confirm('⚠️ Are you sure you want to delete this room? This action cannot be undone.')) return;
+  try {
+    const res = await fetch(`/rooms/delete/${roomId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Room deleted successfully!');
+      fetchRooms();
+    } else {
+      showToast(data.message || 'Error deleting room', true);
+    }
+  } catch (err) {
+    showToast('Error deleting room', true);
+  }
+}
+
+// ===== MODAL CLOSE =====
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('roomModal').classList.remove('active');
+});
+document.getElementById('roomModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('roomModal').classList.remove('active');
+  }
 });
 
-// Load users
-async function loadUsers(){
-  const res = await fetch('/users');
-  const users = await res.json();
-  const select = document.getElementById('userSelect');
-  select.innerHTML = '<option value="">Select User</option>';
-  users.forEach(u => {
-    const opt = document.createElement('option'); 
-    opt.value = u._id; 
-    opt.textContent = u.name;
-    select.appendChild(opt);
-  });
-}
+// ===== KEYBOARD SHORTCUT =====
+document.getElementById('roomNumber').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('addRoomForm').dispatchEvent(new Event('submit')); }
+});
 
-// Edit Room
-async function editRoom(roomId){
-  const newSharing = prompt('Enter new sharing (1-5):');
-  const newType = prompt('Enter room type (AC/Non-AC):');
-  if(!newSharing || !newType) return;
-
-  const res = await fetch(`/rooms/edit/${roomId}`,{
-    method:'PUT',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({sharing:Number(newSharing),type:newType})
-  });
-  const data = await res.json();
-  if(data.success) loadRooms();
-}
-
-// Remove User from Room
-async function removeUser(roomId, userId){
-  if(!confirm('Remove this user?')) return;
-  const res = await fetch(`/rooms/removeUser/${roomId}/${userId}`,{ method:'PUT' });
-  const data = await res.json();
-  if(data.success){ loadRooms(); loadUsers(); } 
-  else alert(data.message);
-}
-
-// Initial load
-loadRooms();
-loadUsers();
+// ===== INITIALIZE =====
+fetchRooms();
+setInterval(fetchRooms, 30000);
 </script>
-
 </body>
 </html>

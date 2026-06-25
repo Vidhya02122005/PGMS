@@ -2,201 +2,830 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Notifications</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Admin Notifications | PGMS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  html, body {
+  * {
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    height: 100%;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #333;
-  }
-
-  h2 {
-  text-align: center;
-  font-size: 2rem;        /* Increased font size */
-  font-weight: 700;       /* Bolder font weight */
-  margin-bottom: 15px;
-  background: linear-gradient(90deg, #2575fc, #6a11cb);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-}
-
-
-  .card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    width: 96%;
-    max-width: 1400px;
-    margin: 30px auto;
-    padding: 30px 25px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Caption styling */
-  .caption {
-    font-weight: 700;
-    font-size: 1.4rem; /* Increased font size */
-    margin-bottom: 12px;
-    color: #0713b7;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-    border-left: 4px solid #6a11cb;
-    padding-left: 8px;
-  }
-
-  /* Add spacing between cards */
-  .card + .card {
-    margin-top: 20px;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  label {
-    font-weight: 500;
-  }
-
-  input, select, textarea, button {
-    padding: 10px;
-    margin-top:10px ;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    width: 100%;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  textarea {
-    resize: none;
-    height: 100px;
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f2f8;
+    color: #1e293b;
+    overflow: hidden;
   }
 
-  button {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
+  /* Mobile Menu Button */
+  .menu-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
     border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 20px;
     cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    position: fixed;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .sidebar-inner::-webkit-scrollbar {
+    width: 4px;
+  }
+  .sidebar-inner::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+  }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
+  }
+
+  .sidebar h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .profile {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .profile img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #60a5fa;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
+
+  .profile h3 { 
+    font-size: 1.1rem; 
     font-weight: 600;
-    transition: 0.3s;
-    margin-top: 20px;
+    color: #e2e8f0;
   }
 
-  button:hover {
-    opacity: 0.9;
-    transform: scale(1.01);
+  .profile p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
   }
 
-  table {
+  .nav-links {
+    list-style: none;
+    flex: 1;
+    padding: 0 4px 8px 0;
+  }
+
+  .nav-links li { margin-bottom: 4px; }
+
+  .nav-links li a {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .nav-links li a i {
+    width: 22px;
+    font-size: 17px;
+  }
+
+  .nav-links li a:hover { 
+    background: rgba(96, 165, 250, 0.08); 
+    color: #e2e8f0; 
+  }
+
+  .nav-links li a.active { 
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+    color: white; 
+    box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+
+  /* Analytics button special style */
+  .nav-links li a.analytics-link {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+    margin-top: 6px;
+  }
+
+  .nav-links li a.analytics-link:hover {
+    background: rgba(231, 76, 60, 0.2);
+  }
+
+  /* Overlay for mobile */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(4px);
+  }
+
+  .overlay.active {
+    display: block;
+  }
+
+  /* Main Content */
+  .content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 30px 40px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #f0f2f8;
+  }
+
+  .content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .content::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+  }
+  .content::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  /* Page Header */
+  .page-header {
+    margin-bottom: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .page-header p {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card h3 {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  /* Form Card */
+  .form-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .form-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .form-header i {
+    font-size: 22px;
+    color: #3b82f6;
+  }
+
+  .form-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .form-group label i {
+    margin-right: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59,130,246,0.3);
+  }
+
+  /* Table Card */
+  .table-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .table-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .refresh-btn {
+    background: #0f172a;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Mobile Cards (for notifications) */
+  .mobile-cards {
+    display: none;
+  }
+
+  .notif-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .notif-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .notif-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .notif-type {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .type-Info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .type-Warning {
+    background: #fed7aa;
+    color: #92400e;
+  }
+
+  .type-Alert {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .type-General {
+    background: #e2e8f0;
+    color: #475569;
+  }
+
+  .notif-message {
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .notif-date {
+    font-size: 11px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Desktop Table */
+  .desktop-table {
+    display: none;
+  }
+
+  .notifications-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
-    flex: 1;
-    overflow-y: auto;
+  }
+
+  .notifications-table th,
+  .notifications-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .notifications-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  .notifications-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 2001;
+    display: none;
+  }
+
+  .toast.show {
     display: block;
+    animation: slideUp 0.3s ease;
   }
 
-  thead {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   }
 
-  tbody {
-    display: block;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
-
-  th, td {
-    padding: 10px;
+  .loading {
     text-align: center;
-    border-bottom: 1px solid #eee;
-    word-wrap: break-word;
+    padding: 40px;
+    color: #94a3b8;
   }
 
-  tr:hover td {
-    background: #f8f9ff;
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
   }
 
-  @media(max-width:768px){
-    table, thead, tbody, tr, th, td {
-      display: block;
+  /* Tablet and Desktop */
+  @media (min-width: 768px) {
+    .menu-toggle {
+      display: none;
     }
-    th, td {
-      text-align: left;
+
+    .sidebar {
+      left: 0 !important;
+      position: fixed;
     }
-    tbody {
-      max-height: none;
+
+    .content {
+      margin-left: 280px;
+      padding: 30px 40px;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .stat-card {
+      padding: 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .mobile-cards {
+      display: none !important;
+    }
+
+    .desktop-table {
+      display: block !important;
+    }
+
+    .overlay {
+      display: none !important;
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -280px;
+      top: 0;
+      z-index: 1000;
+      height: 100vh;
+      box-shadow: none;
+    }
+
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 70px 16px 30px 16px;
+      height: 100vh;
+    }
+
+    .desktop-table {
+      display: none !important;
+    }
+
+    .mobile-cards {
+      display: block !important;
     }
   }
 </style>
 </head>
 <body>
+  <!-- ===== SIDEBAR START ===== -->
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
 
+  <div class="overlay" id="overlay"></div>
 
-<div class="card">
-  <h2>Admin Notifications</h2>
-  <div class="caption">Send General Notification</div>
-  <form id="notificationForm">
-    <label>Title</label>
-    <input type="text" name="title" placeholder="Enter title" required>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>ADMIN</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" id="navDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html" id="navRegistrations"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html" id="navRooms"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li><a href="attendance.html" id="navAttendance"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html" class="active" id="navNotifications"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html" id="navComplaints"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html" id="navPayments"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html" id="navMealplan"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="analytics.html" class="analytics-link" id="navAnalytics"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
+    </div>
+  </div>
+  <!-- ===== SIDEBAR END ===== -->
 
-    <label>Message</label>
-    <textarea name="message" placeholder="Enter message" required></textarea>
+  <!-- ===== MAIN CONTENT START ===== -->
+  <div class="content">
+    <div class="page-header">
+      <h1>Notification Center</h1>
+      <p>Send announcements and manage notifications to all users</p>
+    </div>
 
-    <label>Type</label>
-    <select name="type" required>
-      <option value="">Select Type</option>
-      <option value="Info">Info</option>
-      <option value="Warning">Warning</option>
-      <option value="Alert">Alert</option>
-    </select>
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #3b82f6;">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3>Total Sent</h3>
+        <div class="stat-value" id="totalSent">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <h3>Info</h3>
+        <div class="stat-value" id="infoCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fed7aa; color: #ea580c;">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3>Warning</h3>
+        <div class="stat-value" id="warningCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h3>Alert</h3>
+        <div class="stat-value" id="alertCount">0</div>
+      </div>
+    </div>
 
-    <button type="submit">Send Notification</button>
-  </form>
-</div>
+    <!-- Send Notification Form -->
+    <div class="form-card">
+      <div class="form-header">
+        <i class="fas fa-paper-plane"></i>
+        <h3>Send New Notification</h3>
+      </div>
+      <form id="notificationForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-heading"></i> Title</label>
+            <input type="text" name="title" placeholder="Enter notification title" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> Notification Type</label>
+            <select name="type" required>
+              <option value="">Select Type</option>
+              <option value="Info">📘 Info</option>
+              <option value="Warning">⚠️ Warning</option>
+              <option value="Alert">🚨 Alert</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-message"></i> Message</label>
+          <textarea name="message" placeholder="Enter notification message..." required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-paper-plane"></i> Send Notification to All Users
+        </button>
+      </form>
+    </div>
 
-<div class="card" style="height:50vh;">
-  <div class="caption">Sent Notifications</div>
-  <table>
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Message</th>
-        <th>Type</th>
-        <th>Sent At</th>
-      </tr>
-    </thead>
-    <tbody id="notifTable">
-      <tr><td colspan="4">Loading notifications...</td></tr>
-    </tbody>
-  </table>
-</div>
+    <!-- Notifications List -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-history"></i> Sent Notifications</h3>
+        <button class="refresh-btn" onclick="loadNotifications()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+
+      <!-- Desktop Table View -->
+      <div class="desktop-table">
+        <div class="table-wrapper" style="overflow-x: auto;">
+          <table class="notifications-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Message</th>
+                <th>Type</th>
+                <th>Sent At</th>
+              </tr>
+            </thead>
+            <tbody id="notifTable">
+              <tr><td colspan="4" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile Cards View -->
+      <div id="mobileCards" class="mobile-cards"></div>
+    </div>
+  </div>
+  <!-- ===== MAIN CONTENT END ===== -->
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
 <script>
+// ===== SIDEBAR JAVASCRIPT =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+if (menuToggle) {
+  menuToggle.addEventListener('click', openMenu);
+}
+if (overlay) {
+  overlay.addEventListener('click', closeMenu);
+}
+
+// Close menu when clicking a link (mobile)
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// Highlight active page
+const currentPage = window.location.pathname.split('/').pop();
+document.querySelectorAll('.nav-links a').forEach(link => {
+  const href = link.getAttribute('href');
+  if (href === currentPage) {
+    link.classList.add('active');
+  }
+});
+
+// ===== NOTIFICATIONS JAVASCRIPT =====
+let notificationsData = [];
+
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#ef4444' : '#10b981';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Send Notification
 document.getElementById('notificationForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = Object.fromEntries(new FormData(e.target));
-  formData.isGeneral = true; // always general
+  formData.isGeneral = true;
 
-  // fallback type if not selected
-  if(!formData.type) formData.type = 'General';
+  if (!formData.type) formData.type = 'General';
 
   try {
     const res = await fetch('/admin/notifications', {
@@ -206,49 +835,143 @@ document.getElementById('notificationForm').addEventListener('submit', async (e)
     });
     const data = await res.json();
     if (data.success) {
-      alert('Notification sent successfully!');
+      showToast('Notification sent successfully!');
       e.target.reset();
-      loadNotifications(); // refresh table
+      loadNotifications();
     } else {
-      alert(data.message);
+      showToast(data.message, true);
     }
   } catch (err) {
     console.error(err);
-    alert('Failed to send notification: ' + err.message);
+    showToast('Failed to send notification: ' + err.message, true);
   }
 });
 
+// Load Notifications
 async function loadNotifications() {
   try {
     const res = await fetch('/admin/notifications/all');
     const data = await res.json();
-    const tbody = document.getElementById('notifTable');
-    tbody.innerHTML = '';
-
-    if (data.success && data.notifications.length > 0) {
-      data.notifications.forEach(n => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${n.title}</td>
-          <td>${n.message}</td>
-          <td>${n.type || 'General'}</td>
-          <td>${new Date(n.createdAt).toLocaleString()}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+    
+    if (data.success && data.notifications) {
+      notificationsData = data.notifications;
+      updateStats();
+      renderDesktopTable();
+      renderMobileCards();
     } else {
-      tbody.innerHTML = '<tr><td colspan="4">No notifications found</td></tr>';
+      showError('No notifications found');
     }
   } catch (err) {
     console.error(err);
-    alert('Failed to load notifications: ' + err.message);
+    showError('Failed to load notifications');
   }
 }
 
-// Load notifications on page load
+function updateStats() {
+  const totalSent = notificationsData.length;
+  const infoCount = notificationsData.filter(n => n.type === 'Info').length;
+  const warningCount = notificationsData.filter(n => n.type === 'Warning').length;
+  const alertCount = notificationsData.filter(n => n.type === 'Alert').length;
+
+  document.getElementById('totalSent').innerHTML = totalSent;
+  document.getElementById('infoCount').innerHTML = infoCount;
+  document.getElementById('warningCount').innerHTML = warningCount;
+  document.getElementById('alertCount').innerHTML = alertCount;
+}
+
+function renderDesktopTable() {
+  const tbody = document.getElementById('notifTable');
+  
+  if (!notificationsData.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No notifications found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = notificationsData.map(notification => {
+    let typeClass = '';
+    switch(notification.type) {
+      case 'Info': typeClass = 'type-Info'; break;
+      case 'Warning': typeClass = 'type-Warning'; break;
+      case 'Alert': typeClass = 'type-Alert'; break;
+      default: typeClass = 'type-General';
+    }
+    
+    return `
+      <tr>
+        <td><strong>${escapeHtml(notification.title)}</strong></td>
+        <td>${escapeHtml(notification.message)}</td>
+        <td><span class="notif-type ${typeClass}">${notification.type || 'General'}</span></td>
+        <td>${formatDate(notification.createdAt)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderMobileCards() {
+  const container = document.getElementById('mobileCards');
+  
+  if (!notificationsData.length) {
+    container.innerHTML = '<div class="empty-state">No notifications found</div>';
+    return;
+  }
+
+  container.innerHTML = notificationsData.map(notification => {
+    let typeClass = '';
+    let typeIcon = '';
+    switch(notification.type) {
+      case 'Info': typeClass = 'type-Info'; typeIcon = 'fa-info-circle'; break;
+      case 'Warning': typeClass = 'type-Warning'; typeIcon = 'fa-exclamation-triangle'; break;
+      case 'Alert': typeClass = 'type-Alert'; typeIcon = 'fa-bell'; break;
+      default: typeClass = 'type-General'; typeIcon = 'fa-message';
+    }
+    
+    return `
+      <div class="notif-card">
+        <div class="notif-card-header">
+          <span class="notif-title">${escapeHtml(notification.title)}</span>
+          <span class="notif-type ${typeClass}"><i class="fas ${typeIcon}"></i> ${notification.type || 'General'}</span>
+        </div>
+        <div class="notif-message">${escapeHtml(notification.message)}</div>
+        <div class="notif-date">
+          <i class="fas fa-calendar-alt"></i> ${formatDate(notification.createdAt)}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-IN', { 
+    day: '2-digit', 
+    month: 'short', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function showError(message) {
+  document.getElementById('notifTable').innerHTML = `<tr><td colspan="4" class="empty-state" style="color:#ef4444;">${message}</td></tr>`;
+  document.getElementById('mobileCards').innerHTML = `<div class="empty-state" style="color:#ef4444;">${message}</div>`;
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadNotifications, 30000);
+
+// Initial load
 loadNotifications();
 </script>
-
-
 </body>
 </html>

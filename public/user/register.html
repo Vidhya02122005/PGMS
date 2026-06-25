@@ -106,6 +106,22 @@
 </div>
 
 <script>
+  // Automatically fill Google profile metrics if redirected from OAuth callback response
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('google') === 'true') {
+      const gName = localStorage.getItem('googleName');
+      const gEmail = localStorage.getItem('googleEmail');
+      
+      if (gName) document.getElementById('name').value = gName;
+      if (gEmail) document.getElementById('email').value = gEmail;
+      
+      // Clean up local storage items after consumption
+      localStorage.removeItem('googleName');
+      localStorage.removeItem('googleEmail');
+    }
+  });
+
   // Toggle password visibility
   function togglePassword() {
     const password = document.getElementById("password");
@@ -176,10 +192,13 @@
     .then(res => res.json())
     .then(data => {
       if(data.success) {
-        alert("Welcome " + data.user.name);
+        alert("Welcome back " + data.user.name);
         window.location.href = "dashboard.html";
       } else {
-        alert("Google Sign-In failed!");
+        // If profile isn't registered, hold fields and apply redirect loop parameters
+        localStorage.setItem('googleName', data.name);
+        localStorage.setItem('googleEmail', data.email);
+        window.location.href = "register.html?google=true";
       }
     })
     .catch(err => console.error(err));

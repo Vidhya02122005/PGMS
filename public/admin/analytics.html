@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Analytics Dashboard | PGMS Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f2f8;
+    color: #1e293b;
+    overflow: hidden;
+  }
+
+  .menu-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    position: fixed;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .sidebar-inner::-webkit-scrollbar { width: 4px; }
+  .sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+  .sidebar h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .profile {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .profile img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #60a5fa;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
+
+  .profile h3 { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
+  .profile p { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+
+  .nav-links { list-style: none; flex: 1; padding: 0 4px 8px 0; }
+  .nav-links li { margin-bottom: 4px; }
+  .nav-links li a {
+    text-decoration: none;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    transition: all 0.25s ease;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  .nav-links li a i { width: 22px; font-size: 17px; }
+  .nav-links li a:hover { background: rgba(96, 165, 250, 0.08); color: #e2e8f0; }
+  .nav-links li a.active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .nav-links li a.analytics-link { background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); margin-top: 6px; }
+  .nav-links li a.analytics-link:hover { background: rgba(231, 76, 60, 0.2); }
+
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; backdrop-filter: blur(4px); }
+  .overlay.active { display: block; }
+
+  .content {
+    flex-grow: 1;
+    margin-left: 280px;
+    padding: 30px 40px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #f0f2f8;
+  }
+
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+  .page-header { margin-bottom: 20px; }
+  .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .page-header p { color: #64748b; font-size: 13px; }
+
+  .filter-bar {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-group label { font-size: 11px; font-weight: 600; color: #64748b; }
+  .filter-group input, .filter-group select {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .filter-btn {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .reset-btn { background: #64748b; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin: 0 auto 10px auto;
+  }
+  .stat-card h3 { font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; }
+  .stat-change { font-size: 10px; margin-top: 4px; }
+  .positive { color: #10b981; }
+  .negative { color: #ef4444; }
+
+  .chart-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+  }
+  .chart-card.hidden { display: none; }
+  .chart-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 250px;
+  }
+  .chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .table-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { background: #f8fafc; font-weight: 600; color: #64748b; font-size: 12px; }
+  .loading { text-align: center; padding: 40px; color: #94a3b8; }
+
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-completed { background: #d1fae5; color: #065f46; }
+  .status-pending { background: #fed7aa; color: #92400e; }
+  .status-resolved { background: #dbeafe; color: #1e40af; }
+  .status-inprogress { background: #e0e7ff; color: #3730a3; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    z-index: 2001;
+    display: none;
+  }
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+  .error-message {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  .error-message i { font-size: 24px; display: block; margin-bottom: 8px; }
+
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle { display: flex; }
+    .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; box-shadow: none; }
+    .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+    .content { margin-left: 0; padding: 70px 16px 30px 16px; height: 100vh; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .chart-row { grid-template-columns: 1fr; }
+    .filter-bar { flex-direction: column; }
+    .filter-group { width: 100%; }
+    .filter-group input, .filter-group select { width: 100%; }
+    .chart-wrapper { height: 200px; }
+  }
+</style>
+</head>
+<body>
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>VIDHYA</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="analytics.html" class="analytics-link active"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="page-header">
+      <h1>Analytics Dashboard</h1>
+      <p>Comprehensive insights and reports from all modules</p>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" id="fromDate">
+      </div>
+      <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" id="toDate">
+      </div>
+      <div class="filter-group">
+        <label>Report Type</label>
+        <select id="reportType">
+          <option value="all">📊 All Reports</option>
+          <option value="users">👥 Users</option>
+          <option value="payments">💰 Payments</option>
+          <option value="complaints">💬 Complaints</option>
+          <option value="rooms">🏠 Rooms</option>
+          <option value="attendance">✅ Attendance</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="refreshAnalytics()"><i class="fas fa-sync-alt"></i> Apply</button>
+      <button class="filter-btn reset-btn" onclick="resetFilters()"><i class="fas fa-undo"></i> Reset</button>
+    </div>
+
+    <div id="errorContainer"></div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;"><i class="fas fa-users"></i></div>
+        <h3>Total Users</h3>
+        <div class="stat-value" id="totalUsers">0</div>
+        <div class="stat-change positive" id="userChange">+0%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:#10b981;"><i class="fas fa-rupee-sign"></i></div>
+        <h3>Total Revenue</h3>
+        <div class="stat-value" id="totalRevenue">₹0</div>
+        <div class="stat-change positive" id="revenueChange">+0%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fed7aa;color:#ea580c;"><i class="fas fa-ticket-alt"></i></div>
+        <h3>Complaints</h3>
+        <div class="stat-value" id="totalComplaints">0</div>
+        <div class="stat-change" id="complaintChange">0 resolved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#e0e7ff;color:#6366f1;"><i class="fas fa-door-open"></i></div>
+        <h3>Occupancy Rate</h3>
+        <div class="stat-value" id="occupancyRate">0%</div>
+        <div class="stat-change" id="roomStatus">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-calendar-check"></i></div>
+        <h3>Attendance Today</h3>
+        <div class="stat-value" id="attendanceToday">0%</div>
+        <div class="stat-change" id="attendanceStatus">0 present</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card" id="chartRevenueTrend">
+        <h3><i class="fas fa-chart-line"></i> Revenue Trend</h3>
+        <div class="chart-wrapper"><canvas id="revenueTrendChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="chartPaymentStatus">
+        <h3><i class="fas fa-chart-pie"></i> Payment Status</h3>
+        <div class="chart-wrapper"><canvas id="paymentStatusChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card" id="chartComplaintStatus">
+        <h3><i class="fas fa-chart-bar"></i> Complaint Status</h3>
+        <div class="chart-wrapper"><canvas id="complaintStatusChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="chartRegistrations">
+        <h3><i class="fas fa-chart-line"></i> Monthly Registrations</h3>
+        <div class="chart-wrapper"><canvas id="registrationsChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card" id="chartRoomType">
+        <h3><i class="fas fa-chart-pie"></i> Room Type Distribution</h3>
+        <div class="chart-wrapper"><canvas id="roomTypeChart"></canvas></div>
+      </div>
+      <div class="chart-card" id="chartAttendanceTrend">
+        <h3><i class="fas fa-chart-bar"></i> Weekly Attendance Trend</h3>
+        <div class="chart-wrapper"><canvas id="attendanceTrendChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3><i class="fas fa-list"></i> Recent Transactions & Activities</h3>
+      </div>
+      <div class="table-wrapper">
+        <table id="activitiesTable">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>User</th>
+              <th>Details</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+// ===== SIDEBAR =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (overlay) overlay.addEventListener('click', closeMenu);
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// ===== TOAST =====
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#ef4444' : '#10b981';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== SHOW ERROR =====
+function showError(message) {
+  const container = document.getElementById('errorContainer');
+  container.innerHTML = `
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>Error:</strong> ${message}
+      <br><small>Check the browser console (F12) for more details.</small>
+    </div>
+  `;
+}
+
+function clearError() {
+  document.getElementById('errorContainer').innerHTML = '';
+}
+
+// ===== CHART INSTANCES =====
+let revenueChart = null;
+let paymentStatusChart = null;
+let complaintStatusChart = null;
+let registrationsChart = null;
+let roomTypeChart = null;
+let attendanceTrendChart = null;
+
+// ===== STORE DATA =====
+let allUsers = [];
+let allPayments = [];
+let allComplaints = [];
+let allRooms = [];
+let allAttendance = [];
+
+// ===== DESTROY ALL CHARTS =====
+function destroyAllCharts() {
+  const charts = [revenueChart, paymentStatusChart, complaintStatusChart, registrationsChart, roomTypeChart, attendanceTrendChart];
+  charts.forEach(chart => {
+    if (chart) {
+      chart.destroy();
+    }
+  });
+  revenueChart = null;
+  paymentStatusChart = null;
+  complaintStatusChart = null;
+  registrationsChart = null;
+  roomTypeChart = null;
+  attendanceTrendChart = null;
+}
+
+// ===== FETCH FUNCTIONS =====
+
+async function fetchUsers() {
+  try {
+    const res = await fetch('/admin/registrations');
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.success) {
+      allUsers = data.users || [];
+      return allUsers;
+    }
+    return [];
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    return [];
+  }
+}
+
+async function fetchPayments() {
+  try {
+    const res = await fetch('/admin/payments');
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.success) {
+      allPayments = data.payments || [];
+      return allPayments;
+    }
+    return [];
+  } catch (err) {
+    console.error('Error fetching payments:', err);
+    return [];
+  }
+}
+
+async function fetchComplaints() {
+  try {
+    const res = await fetch('/admin/complaints/data');
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.success) {
+      allComplaints = data.complaints || [];
+      return allComplaints;
+    }
+    return [];
+  } catch (err) {
+    console.error('Error fetching complaints:', err);
+    return [];
+  }
+}
+
+async function fetchRooms() {
+  try {
+    const res = await fetch('/rooms');
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (data.success) {
+      allRooms = data.rooms || [];
+      return allRooms;
+    }
+    return [];
+  } catch (err) {
+    console.error('Error fetching rooms:', err);
+    return [];
+  }
+}
+
+async function fetchAttendance() {
+  try {
+    const res = await fetch('/api/attendance/admin/all');
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      allAttendance = data;
+      return allAttendance;
+    }
+    if (data && data.success && Array.isArray(data.attendance)) {
+      allAttendance = data.attendance;
+      return allAttendance;
+    }
+    if (data && Array.isArray(data.data)) {
+      allAttendance = data.data;
+      return allAttendance;
+    }
+    return [];
+  } catch (err) {
+    console.error('Error fetching attendance:', err);
+    return [];
+  }
+}
+
+// ===== UPDATE STATS =====
+function updateStats(users, payments, complaints, rooms, attendance) {
+  document.getElementById('totalUsers').textContent = users.length || 0;
+  
+  const completedPayments = payments.filter(p => p.status === 'Completed');
+  const totalRevenue = completedPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+  document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toLocaleString('en-IN')}`;
+  
+  document.getElementById('totalComplaints').textContent = complaints.length || 0;
+  const resolved = complaints.filter(c => c.status === 'Resolved').length;
+  document.getElementById('complaintChange').textContent = `${resolved} resolved`;
+  
+  let totalCapacity = 0, totalOccupants = 0;
+  rooms.forEach(room => {
+    totalCapacity += room.sharing || 0;
+    totalOccupants += (room.occupants?.length || 0);
+  });
+  const occupancyRate = totalCapacity > 0 ? ((totalOccupants / totalCapacity) * 100).toFixed(1) : 0;
+  document.getElementById('occupancyRate').textContent = `${occupancyRate}%`;
+  document.getElementById('roomStatus').textContent = `${totalOccupants}/${totalCapacity} beds`;
+  
+  const today = new Date().toLocaleDateString();
+  const todayAttendance = attendance.filter(a => {
+    if (!a.checkIn) return false;
+    const date = new Date(a.checkIn).toLocaleDateString();
+    return date === today;
+  });
+  
+  const uniqueUsersToday = new Set();
+  todayAttendance.forEach(a => {
+    const userId = a.user?._id || a.userId || a.user;
+    if (userId) uniqueUsersToday.add(userId.toString());
+  });
+  
+  const presentToday = uniqueUsersToday.size;
+  const totalUsersCount = users.length || 1;
+  const attendanceRate = ((presentToday / totalUsersCount) * 100).toFixed(1);
+  
+  document.getElementById('attendanceToday').textContent = `${attendanceRate}%`;
+  document.getElementById('attendanceStatus').textContent = `${presentToday} present today`;
+}
+
+// ===== RENDER CHARTS =====
+function renderCharts(users, payments, complaints, rooms, attendance) {
+  // Destroy existing charts
+  destroyAllCharts();
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  // 1. Revenue Trend Chart
+  const monthlyRevenue = new Array(12).fill(0);
+  payments.forEach(p => {
+    if (p.status === 'Completed' && p.date) {
+      const date = new Date(p.date);
+      if (!isNaN(date.getTime())) {
+        const month = date.getMonth();
+        monthlyRevenue[month] += parseFloat(p.amount) || 0;
+      }
+    }
+  });
+  
+  const ctx1 = document.getElementById('revenueTrendChart').getContext('2d');
+  revenueChart = new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: monthlyRevenue,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // 2. Payment Status Chart
+  const completed = payments.filter(p => p.status === 'Completed').length;
+  const pending = payments.filter(p => p.status === 'Pending').length;
+  
+  const ctx2 = document.getElementById('paymentStatusChart').getContext('2d');
+  paymentStatusChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Pending'],
+      datasets: [{
+        data: [completed, pending],
+        backgroundColor: ['#10b981', '#f59e0b'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // 3. Complaint Status Chart
+  const pendingComplaints = complaints.filter(c => c.status === 'Pending').length;
+  const inProgress = complaints.filter(c => c.status === 'InProgress').length;
+  const resolvedComplaints = complaints.filter(c => c.status === 'Resolved').length;
+  
+  const ctx3 = document.getElementById('complaintStatusChart').getContext('2d');
+  complaintStatusChart = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: ['Pending', 'In Progress', 'Resolved'],
+      datasets: [{
+        label: 'Complaints',
+        data: [pendingComplaints, inProgress, resolvedComplaints],
+        backgroundColor: ['#f59e0b', '#0dcaf0', '#10b981'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // 4. Monthly Registrations Chart
+  const monthlyRegistrations = new Array(12).fill(0);
+  users.forEach(u => {
+    if (u.createdAt) {
+      const date = new Date(u.createdAt);
+      if (!isNaN(date.getTime())) {
+        const month = date.getMonth();
+        monthlyRegistrations[month]++;
+      }
+    }
+  });
+  
+  const ctx4 = document.getElementById('registrationsChart').getContext('2d');
+  registrationsChart = new Chart(ctx4, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'New Users',
+        data: monthlyRegistrations,
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139,92,246,0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // 5. Room Type Chart
+  const acCount = rooms.filter(r => r.type === 'AC').length;
+  const nonAcCount = rooms.filter(r => r.type === 'Non-AC').length;
+  
+  const ctx5 = document.getElementById('roomTypeChart').getContext('2d');
+  roomTypeChart = new Chart(ctx5, {
+    type: 'doughnut',
+    data: {
+      labels: ['AC Rooms', 'Non-AC Rooms'],
+      datasets: [{
+        data: [acCount, nonAcCount],
+        backgroundColor: ['#3b82f6', '#94a3b8'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // 6. Attendance Trend (last 7 days)
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weeklyAttendance = new Array(7).fill(0);
+  
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 6);
+  
+  attendance.forEach(a => {
+    if (a.checkIn) {
+      const date = new Date(a.checkIn);
+      if (!isNaN(date.getTime()) && date >= weekAgo && date <= now) {
+        const day = date.getDay();
+        weeklyAttendance[day]++;
+      }
+    }
+  });
+  
+  const ctx6 = document.getElementById('attendanceTrendChart').getContext('2d');
+  attendanceTrendChart = new Chart(ctx6, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Check-ins',
+        data: weeklyAttendance,
+        backgroundColor: '#3b82f6',
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+// ===== RENDER ACTIVITIES TABLE =====
+function renderActivities(users, payments, complaints, attendance) {
+  const tbody = document.querySelector('#activitiesTable tbody');
+  const activities = [];
+  
+  payments.slice(0, 5).forEach(p => {
+    activities.push({
+      type: '💰 Payment',
+      user: p.userId?.name || 'Unknown',
+      details: `₹${(parseFloat(p.amount) || 0).toLocaleString('en-IN')}`,
+      status: p.status || 'Pending',
+      date: p.date || new Date(),
+      statusClass: p.status === 'Completed' ? 'status-completed' : 'status-pending'
+    });
+  });
+  
+  complaints.slice(0, 5).forEach(c => {
+    const statusMap = {
+      'Pending': 'status-pending',
+      'InProgress': 'status-inprogress',
+      'Resolved': 'status-resolved'
+    };
+    activities.push({
+      type: '💬 Complaint',
+      user: c.userId?.name || 'Unknown',
+      details: c.complaint?.substring(0, 50) + (c.complaint?.length > 50 ? '...' : ''),
+      status: c.status || 'Pending',
+      date: c.createdAt || new Date(),
+      statusClass: statusMap[c.status] || 'status-pending'
+    });
+  });
+  
+  attendance.slice(0, 5).forEach(a => {
+    const userName = a.user?.name || a.user?.email || 'Unknown';
+    activities.push({
+      type: '✅ Attendance',
+      user: userName,
+      details: a.checkOut ? 'Checked Out' : 'Checked In',
+      status: a.checkOut ? 'Completed' : 'Active',
+      date: a.checkIn || new Date(),
+      statusClass: a.checkOut ? 'status-completed' : 'status-pending'
+    });
+  });
+  
+  activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (activities.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">No activities found</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = activities.slice(0, 15).map(a => `
+    <tr>
+      <td>${a.type}</td>
+      <td><strong>${a.user}</strong></td>
+      <td>${a.details}</td>
+      <td><span class="status-badge ${a.statusClass}">${a.status}</span></td>
+      <td>${new Date(a.date).toLocaleDateString()}</td>
+    </tr>
+  `).join('');
+}
+
+// ===== REFRESH ANALYTICS =====
+async function refreshAnalytics() {
+  clearError();
+  showToast('Loading analytics data...');
+  
+  const fromDate = document.getElementById('fromDate').value;
+  const toDate = document.getElementById('toDate').value;
+  const reportType = document.getElementById('reportType').value;
+  
+  // Fetch all data
+  const users = await fetchUsers();
+  const payments = await fetchPayments();
+  const complaints = await fetchComplaints();
+  const rooms = await fetchRooms();
+  const attendance = await fetchAttendance();
+  
+  console.log('📊 Data Summary:', { users: users.length, payments: payments.length, complaints: complaints.length, rooms: rooms.length, attendance: attendance.length });
+  
+  // Apply report type filters
+  const allCharts = ['chartRevenueTrend', 'chartPaymentStatus', 'chartComplaintStatus', 
+                     'chartRegistrations', 'chartRoomType', 'chartAttendanceTrend'];
+  
+  allCharts.forEach(id => document.getElementById(id).style.display = 'block');
+  
+  if (reportType === 'payments') {
+    ['chartComplaintStatus', 'chartRegistrations', 'chartRoomType', 'chartAttendanceTrend'].forEach(id => 
+      document.getElementById(id).style.display = 'none'
+    );
+  } else if (reportType === 'complaints') {
+    ['chartRevenueTrend', 'chartPaymentStatus', 'chartRegistrations', 'chartRoomType', 'chartAttendanceTrend'].forEach(id => 
+      document.getElementById(id).style.display = 'none'
+    );
+  } else if (reportType === 'rooms') {
+    ['chartRevenueTrend', 'chartPaymentStatus', 'chartComplaintStatus', 'chartRegistrations', 'chartAttendanceTrend'].forEach(id => 
+      document.getElementById(id).style.display = 'none'
+    );
+  } else if (reportType === 'users') {
+    ['chartRevenueTrend', 'chartPaymentStatus', 'chartComplaintStatus', 'chartRoomType', 'chartAttendanceTrend'].forEach(id => 
+      document.getElementById(id).style.display = 'none'
+    );
+  } else if (reportType === 'attendance') {
+    ['chartRevenueTrend', 'chartPaymentStatus', 'chartComplaintStatus', 'chartRegistrations', 'chartRoomType'].forEach(id => 
+      document.getElementById(id).style.display = 'none'
+    );
+  }
+  
+  // Update stats and charts
+  updateStats(users, payments, complaints, rooms, attendance);
+  renderCharts(users, payments, complaints, rooms, attendance);
+  renderActivities(users, payments, complaints, attendance);
+  
+  if (users.length === 0 && payments.length === 0 && complaints.length === 0 && rooms.length === 0 && attendance.length === 0) {
+    showError('No data found. Make sure you have data in your database.');
+  } else {
+    showToast(`✅ Analytics loaded: ${users.length} users, ${payments.length} payments, ${complaints.length} complaints, ${rooms.length} rooms, ${attendance.length} attendance records`);
+  }
+}
+
+// ===== RESET FILTERS =====
+function resetFilters() {
+  document.getElementById('reportType').value = 'all';
+  document.getElementById('fromDate').value = '';
+  document.getElementById('toDate').value = '';
+  
+  ['chartRevenueTrend', 'chartPaymentStatus', 'chartComplaintStatus', 
+   'chartRegistrations', 'chartRoomType', 'chartAttendanceTrend'].forEach(id => 
+    document.getElementById(id).style.display = 'block'
+  );
+  
+  refreshAnalytics();
+}
+
+// ===== SET DEFAULT DATES =====
+const today = new Date();
+const lastMonth = new Date();
+lastMonth.setMonth(lastMonth.getMonth() - 1);
+document.getElementById('fromDate').value = lastMonth.toISOString().split('T')[0];
+document.getElementById('toDate').value = today.toISOString().split('T')[0];
+
+// ===== INITIALIZE =====
+// Wait for page to fully load before initializing charts
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(refreshAnalytics, 500);
+});
+
+// Auto-refresh every 30 seconds
+setInterval(refreshAnalytics, 30000);
+</script>
+</body>
+</html>

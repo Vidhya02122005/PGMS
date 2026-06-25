@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover"/>
+<title>My Analytics | PGMS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* ===== CSS VARIABLES ===== */
+  :root {
+    --primary: #6C63FF;
+    --primary-light: #8B83FF;
+    --primary-dark: #5A52D5;
+    --secondary: #FF6584;
+    --success: #2ECC71;
+    --warning: #F1C40F;
+    --danger: #E74C3C;
+    --purple: #A29BFE;
+    --pink: #FD79A8;
+    --blue: #74B9FF;
+    --cyan: #55EFC4;
+    --dark: #2D3436;
+    --dark-light: #636E72;
+    --gray: #B2BEC3;
+    --light-gray: #DFE6E9;
+    --bg: #F8F9FA;
+    --card-shadow: 0 20px 60px rgba(108, 99, 255, 0.08);
+    --card-shadow-hover: 0 30px 80px rgba(108, 99, 255, 0.15);
+    --border-radius: 24px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    overflow-x: hidden;
+    display: flex; /* Active layout alignment */
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
+  /* ===== MOBILE MENU BUTTON ===== */
+  .menu-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    background: white;
+    border: none;
+    color: var(--dark);
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    transition: var(--transition);
+  }
+
+  .menu-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 20px;
+    position: fixed;
+    height: 100vh;
+    top: 0;
+    left: 0; /* Forced default visibility for standard screen sizing */
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+  /* Sidebar Header */
+  .sidebar-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sidebar-header .logo-icon {
+    font-size: 32px;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .sidebar-header p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Sidebar Profile Panel */
+  .sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar-profile::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(255, 101, 132, 0.1));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .sidebar-profile:hover::before { opacity: 1; }
+  .sidebar-profile:hover { border-color: rgba(108, 99, 255, 0.3); transform: translateX(4px); }
+
+  .sidebar-profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+  }
+
+  .sidebar-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sidebar-profile-info { flex: 1; min-width: 0; }
+  .sidebar-profile-info .name { font-size: 14px; font-weight: 600; color: white; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-profile-info .role { font-size: 11px; color: rgba(255,255,255,0.5); display: block; }
+  .sidebar-profile-arrow { color: rgba(255,255,255,0.3); font-size: 12px; transition: var(--transition); }
+  .sidebar-profile:hover .sidebar-profile-arrow { transform: translateX(4px); color: white; }
+
+  /* Nav Links */
+  .nav-links {
+    list-style: none;
+    flex-grow: 1;
+    padding: 4px 0;
+  }
+
+  .nav-links li { margin-bottom: 2px; }
+  .nav-links li a {
+    text-decoration: none;
+    color: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    transition: var(--transition);
+    font-weight: 500;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .nav-links li a i {
+    width: 22px;
+    font-size: 16px;
+    transition: var(--transition);
+    color: rgba(255,255,255,0.4);
+  }
+
+  .nav-links li a:hover {
+    background: rgba(255,255,255,0.06);
+    color: white;
+    transform: translateX(4px);
+  }
+
+  .nav-links li a:hover i { color: white; transform: scale(1.1); }
+
+  .nav-links li a.active {
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(255, 101, 132, 0.1));
+    color: white;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+  }
+
+  .nav-links li a.active i { color: var(--primary-light); }
+
+  .nav-links li a.active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(108, 99, 255, 0.5);
+  }
+
+  /* Logout Button */
+  .logout-btn {
+    margin-top: 8px;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255,255,255,0.6);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .logout-btn:hover {
+    background: rgba(231, 76, 60, 0.15);
+    color: var(--danger);
+    border-color: rgba(231, 76, 60, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .logout-btn i { transition: var(--transition); }
+  .logout-btn:hover i { transform: translateX(3px); }
+
+  /* ===== OVERLAY ===== */
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+  }
+  .overlay.active { display: block; }
+
+  /* ===== MAIN CONTENT WRAPPER ===== */
+  .content {
+    flex-grow: 1;
+    margin-left: 280px; /* Shifts layout accurately on standard desktops */
+    padding: 32px 40px;
+    min-height: 100vh;
+    width: calc(100% - 280px);
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  
+  .animate-slide-down { animation: slideDown 0.6s ease forwards; opacity: 0; }
+  .animate-scale { animation: scaleIn 0.5s ease forwards; opacity: 0; }
+
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.10s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.20s; }
+
+  /* ===== PAGE HEADER ===== */
+  .welcome-section {
+    margin-bottom: 28px;
+    padding: 24px 32px;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.05), rgba(255, 101, 132, 0.05));
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(108, 99, 255, 0.08);
+  }
+
+  .welcome-section h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.5px;
+  }
+
+  .welcome-section h1 span {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .welcome-section p {
+    color: var(--dark-light);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 22px 24px;
+    border: 1px solid rgba(0,0,0,0.04);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: rgba(108, 99, 255, 0.1);
+  }
+
+  .stat-card .stat-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover .stat-icon-wrap { transform: scale(1.05) rotate(-4deg); }
+  .stat-card h4 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dark-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.5px;
+  }
+
+  /* ===== CHART ROWS ===== */
+  .chart-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .chart-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 28px 32px;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+  }
+
+  .chart-card:hover {
+    border-color: rgba(108, 99, 255, 0.1);
+  }
+
+  .chart-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .chart-card h3 i { color: var(--primary); }
+  canvas { max-height: 220px; width: 100% !important; }
+
+  /* ===== ROOM CARD ===== */
+  .room-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 28px 32px;
+    border: 1px solid rgba(0,0,0,0.04);
+    box-shadow: var(--card-shadow);
+  }
+
+  .room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--light-gray);
+  }
+
+  .room-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  .room-header h3 i { color: var(--secondary); }
+  .room-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed rgba(0,0,0,0.04);
+  }
+  
+  .room-detail:last-of-type { border-bottom: none; }
+  .room-label { color: var(--dark-light); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .room-label i { width: 16px; text-align: center; color: var(--primary-light); }
+  .room-value { font-weight: 600; color: var(--dark); }
+  
+  .room-type-badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .type-ac { background: rgba(46, 204, 113, 0.1); color: var(--success); }
+  .type-nonac { background: var(--light-gray); color: var(--dark-light); }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--dark-light);
+    margin-top: 20px;
+  }
+  .footer i { color: var(--primary); }
+
+  /* ===== RESPONSIVE HANDLING ===== */
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .menu-toggle { display: flex; }
+    .sidebar {
+      transform: translateX(-280px);
+      left: 0;
+      top: 0;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+      box-shadow: 20px 0 60px rgba(0,0,0,0.3);
+    }
+    .content {
+      margin-left: 0;
+      padding: 80px 16px 30px 16px;
+      width: 100%;
+    }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chart-row { grid-template-columns: 1fr; gap: 16px; }
+    .stat-card { padding: 16px; }
+    .stat-number { font-size: 22px; }
+    .welcome-section { padding: 20px; }
+    .welcome-section h1 { font-size: 22px; }
+    .chart-card { padding: 20px; }
+    .room-card { padding: 20px; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-card { padding: 14px; }
+    .stat-number { font-size: 18px; }
+    .stat-icon-wrap { width: 40px; height: 40px; font-size: 16px; }
+    .content { padding: 70px 10px 20px 10px; }
+    .sidebar-profile { padding: 10px 12px; }
+    .sidebar-profile-avatar { width: 38px; height: 38px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+       <span class="logo-icon"><i class="fas fa-home"></i></span>
+      <h2>PGMS</h2>
+      <p>Convenience at Your Fingertips</p>
+    </div>
+
+    <a href="profile.html" class="sidebar-profile" id="sidebarProfile">
+      <div class="sidebar-profile-avatar" id="sidebarAvatar">
+        <span id="avatarText">U</span>
+      </div>
+      <div class="sidebar-profile-info">
+        <span class="name" id="sidebarName">User</span>
+        <span class="role" id="sidebarRole">Student</span>
+      </div>
+      <i class="fas fa-chevron-right sidebar-profile-arrow"></i>
+    </a>
+
+    <ul class="nav-links" id="navLinks"></ul>
+    <button class="logout-btn" id="logoutBtn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+  </div>
+
+  <div class="content">
+    <div class="welcome-section animate-slide-down">
+      <h1>My <span>Analytics</span></h1>
+      <p>Track your personal insights, metrics, and activity history.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card animate-scale delay-1">
+        <div class="stat-icon-wrap" style="background: rgba(108, 99, 255, 0.1); color: var(--primary);">
+          <i class="fas fa-rupee-sign"></i>
+        </div>
+        <h4>Total Paid</h4>
+        <div class="stat-number" id="totalPaid">₹0</div>
+      </div>
+      <div class="stat-card animate-scale delay-2">
+        <div class="stat-icon-wrap" style="background: rgba(255, 101, 132, 0.1); color: var(--secondary);">
+          <i class="fas fa-clock"></i>
+        </div>
+        <h4>Pending Payments</h4>
+        <div class="stat-number" id="pendingPayments">0</div>
+      </div>
+      <div class="stat-card animate-scale delay-3">
+        <div class="stat-icon-wrap" style="background: rgba(46, 204, 113, 0.1); color: var(--success);">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h4>Complaints Resolved</h4>
+        <div class="stat-number" id="resolvedComplaints">0</div>
+      </div>
+      <div class="stat-card animate-scale delay-4">
+        <div class="stat-icon-wrap" style="background: rgba(241, 196, 15, 0.1); color: var(--warning);">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <h4>Attendance Rate</h4>
+        <div class="stat-number" id="attendanceRate">0%</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card animate-scale delay-1">
+        <h3><i class="fas fa-chart-line"></i> My Payment History</h3>
+        <canvas id="paymentHistoryChart"></canvas>
+      </div>
+      <div class="chart-card animate-scale delay-2">
+        <h3><i class="fas fa-chart-pie"></i> Payment Status</h3>
+        <canvas id="userPaymentStatusChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card animate-scale delay-3">
+        <h3><i class="fas fa-chart-bar"></i> My Complaint Status</h3>
+        <canvas id="userComplaintChart"></canvas>
+      </div>
+      <div class="chart-card animate-scale delay-4">
+        <h3><i class="fas fa-chart-line"></i> Monthly Spending Trend</h3>
+        <canvas id="spendingTrendChart"></canvas>
+      </div>
+    </div>
+
+    <div class="room-card animate-scale delay-4" id="roomCard">
+      <div class="room-header">
+        <h3><i class="fas fa-door-open"></i> My Room Details</h3>
+      </div>
+      <div id="roomDetails">Loading...</div>
+    </div>
+
+    <div class="footer">
+      <p><i class="fas fa-crown"></i> PGMS - Personal Analytics Dashboard</p>
+    </div>
+  </div>
+
+<script>
+let currentUser = null;
+let paymentHistoryChart, userPaymentStatusChart, userComplaintChart, spendingTrendChart;
+
+const navLinks = [
+  { name: 'Dashboard', href: 'dashboard.html', icon: 'fas fa-tachometer-alt' },
+  { name: 'Attendance', href: 'attendance.html', icon: 'fas fa-calendar-check' },
+  { name: 'Complaints', href: 'complaints.html', icon: 'fas fa-comment-dots' },
+  { name: 'Notifications', href: 'notifications.html', icon: 'fas fa-bell' },
+  { name: 'Payments', href: 'payments.html', icon: 'fas fa-chart-line' },
+  { name: 'Rooms', href: 'rooms.html', icon: 'fas fa-door-open' },
+  { name: 'Meal Plan', href: 'mealplan.html', icon: 'fas fa-utensils' },
+  { name: 'Analytics', href: 'analytics.html', icon: 'fas fa-chart-pie' }
+];
+
+function updateSidebarProfile(user) {
+  const name = user.name || 'User';
+  const role = user.role || 'Student';
+  const avatarText = name.charAt(0).toUpperCase();
+
+  const nameEl = document.getElementById('sidebarName');
+  const roleEl = document.getElementById('sidebarRole');
+  const avatarTextEl = document.getElementById('avatarText');
+  
+  if (nameEl) nameEl.textContent = name;
+  if (roleEl) roleEl.textContent = role;
+  if (avatarTextEl) avatarTextEl.textContent = avatarText;
+
+  if (user.profileImage) {
+    const avatarContainer = document.getElementById('sidebarAvatar');
+    if (avatarContainer) avatarContainer.innerHTML = `<img src="${user.profileImage}" alt="${name}">`;
+  }
+}
+
+async function setupNavigation() {
+  try {
+    const res = await fetch('/users/me');
+    if (!res.ok) throw new Error('Not logged in');
+    currentUser = await res.json();
+    
+    updateSidebarProfile(currentUser);
+    
+    const nav = document.getElementById('navLinks');
+    if (nav) {
+      nav.innerHTML = '';
+      navLinks.forEach((link, index) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = link.href;
+        a.innerHTML = `<i class="${link.icon}"></i> ${link.name}`;
+        a.style.animationDelay = `${0.05 * (index + 1)}s`;
+        if (window.location.pathname.includes(link.href.split('.')[0])) {
+          a.classList.add('active');
+        }
+        li.appendChild(a);
+        nav.appendChild(li);
+      });
+    }
+    
+    await Promise.all([
+      fetchUserPayments(),
+      fetchUserComplaints(),
+      fetchUserRoom(),
+      fetchUserAttendance()
+    ]);
+    
+  } catch(err) {
+    console.error(err);
+    window.location.href = 'login.html';
+  }
+}
+
+async function fetchUserPayments() {
+  try {
+    const res = await fetch(`/user/payments/${currentUser._id}`);
+    const data = await res.json();
+    if (data.success) {
+      const payments = data.payments;
+      const completedPayments = payments.filter(p => p.status === 'Completed');
+      const pendingPayments = payments.filter(p => p.status === 'Pending');
+      
+      const totalPaid = completedPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+      document.getElementById('totalPaid').innerHTML = `₹${totalPaid.toLocaleString('en-IN')}`;
+      document.getElementById('pendingPayments').innerHTML = pendingPayments.length;
+      
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+      const monthlyPayments = [0, 0, 0, 0, 0, 0];
+      completedPayments.forEach(p => {
+        const date = new Date(p.date);
+        const month = date.getMonth();
+        if (month >= 0 && month < 6) monthlyPayments[month] += parseFloat(p.amount) || 0;
+      });
+      
+      const ctx1 = document.getElementById('paymentHistoryChart').getContext('2d');
+      if (paymentHistoryChart) paymentHistoryChart.destroy();
+      paymentHistoryChart = new Chart(ctx1, {
+        type: 'line',
+        data: { labels: months, datasets: [{ label: 'Amount (₹)', data: monthlyPayments, borderColor: '#6C63FF', backgroundColor: 'rgba(108,99,255,0.1)', tension: 0.4, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+      });
+      
+      const ctx2 = document.getElementById('userPaymentStatusChart').getContext('2d');
+      if (userPaymentStatusChart) userPaymentStatusChart.destroy();
+      userPaymentStatusChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: { labels: ['Completed', 'Pending'], datasets: [{ data: [completedPayments.length, pendingPayments.length], backgroundColor: ['#2ECC71', '#F1C40F'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
+      });
+      
+      const spendingByMonth = [0, 0, 0, 0, 0, 0];
+      payments.forEach(p => {
+        const date = new Date(p.date);
+        const month = date.getMonth();
+        if (month >= 0 && month < 6) spendingByMonth[month] += parseFloat(p.amount) || 0;
+      });
+      const ctx4 = document.getElementById('spendingTrendChart').getContext('2d');
+      if (spendingTrendChart) spendingTrendChart.destroy();
+      spendingTrendChart = new Chart(ctx4, {
+        type: 'bar',
+        data: { labels: months, datasets: [{ label: 'Spending (₹)', data: spendingByMonth, backgroundColor: '#FF6584', borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
+  } catch(err) { console.error(err); }
+}
+
+async function fetchUserComplaints() {
+  try {
+    const res = await fetch('/user/complaints');
+    const data = await res.json();
+    if (data.success) {
+      const complaints = data.complaints;
+      const resolved = complaints.filter(c => c.status === 'Resolved').length;
+      const pending = complaints.filter(c => c.status === 'Pending').length;
+      const inProgress = complaints.filter(c => c.status === 'InProgress').length;
+      
+      document.getElementById('resolvedComplaints').innerHTML = resolved;
+      
+      const ctx = document.getElementById('userComplaintChart').getContext('2d');
+      if (userComplaintChart) userComplaintChart.destroy();
+      userComplaintChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ['Pending', 'In Progress', 'Resolved'], datasets: [{ label: 'Complaints', data: [pending, inProgress, resolved], backgroundColor: ['#F1C40F', '#74B9FF', '#2ECC71'], borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
+  } catch(err) { console.error(err); }
+}
+
+async function fetchUserRoom() {
+  try {
+    const res = await fetch('/users/me');
+    const user = await res.json();
+    const container = document.getElementById('roomDetails');
+    
+    if (!user.room || !user.room.roomNumber) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--dark-light);">No room allocated yet</div>';
+      return;
+    }
+    
+    const room = user.room;
+    const typeBadge = room.type === 'AC' ? '<span class="room-type-badge type-ac">AC</span>' : '<span class="room-type-badge type-nonac">Non-AC</span>';
+    const vacancy = room.sharing - (room.occupants?.length || 0);
+    
+    container.innerHTML = `
+      <div class="room-detail"><span class="room-label"><i class="fas fa-hashtag"></i> Room Number:</span><span class="room-value">${room.roomNumber}</span></div>
+      <div class="room-detail"><span class="room-label"><i class="fas fa-thermometer-half"></i> Room Type:</span><span class="room-value">${typeBadge}</span></div>
+      <div class="room-detail"><span class="room-label"><i class="fas fa-user-friends"></i> Sharing:</span><span class="room-value">${room.sharing}</span></div>
+      <div class="room-detail"><span class="room-label"><i class="fas fa-bed"></i> Vacancy:</span><span class="room-value">${vacancy}</span></div>
+      <div class="room-detail"><span class="room-label"><i class="fas fa-users"></i> Roommates:</span><span class="room-value">${room.occupants?.map(o => o.name).join(', ') || 'None'}</span></div>
+    `;
+  } catch(err) { 
+    document.getElementById('roomDetails').innerHTML = '<div style="text-align:center; padding:20px; color:var(--dark-light);">Error loading room details</div>';
+  }
+}
+
+async function fetchUserAttendance() {
+  try {
+    const res = await fetch(`/attendance/user/${currentUser._id}`);
+    const records = await res.json();
+    if (Array.isArray(records)) {
+      const totalDays = records.length;
+      const presentDays = records.filter(r => r.checkOut).length;
+      const rate = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(0) : 0;
+      document.getElementById('attendanceRate').innerHTML = `${rate}%`;
+    }
+  } catch(err) { console.error(err); }
+}
+
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function openMenu() { sidebar.style.transform = 'translateX(0)'; overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeMenu() { sidebar.style.transform = ''; overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (overlay) overlay.addEventListener('click', closeMenu);
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth < 768 && e.target.closest('#navLinks a')) {
+    closeMenu();
+  }
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+  const res = await fetch('/user/logout', { method: 'POST' });
+  const data = await res.json();
+  if (data.success) window.location.href = 'login.html';
+});
+
+setupNavigation();
+</script>
+</body>
+</html>

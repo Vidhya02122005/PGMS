@@ -2,271 +2,1133 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PGMS Admin Attendance</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>Face Recognition Attendance | PGMS Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* Full height flex layout */
-body, html {
-    height: 100%;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Inter', sans-serif; background: #f0f2f8; color: #1e293b; overflow: hidden; }
 
-/* Main container grows to fill available space */
-.main-container {
-    flex: 1;
+  .menu-toggle {
+    position: fixed; top: 12px; left: 12px; z-index: 1001;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none;
+    color: white; width: 44px; height: 44px; border-radius: 12px;
+    font-size: 20px; cursor: pointer; display: none;
+    align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .sidebar {
+    width: 280px; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: white; flex-shrink: 0; display: flex; flex-direction: column;
+    padding: 30px 20px; position: fixed; height: 100vh; overflow: hidden;
+    z-index: 1000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-inner { display: flex; flex-direction: column; height: 100%; overflow-y: auto; padding-right: 4px; }
+  .sidebar-inner::-webkit-scrollbar { width: 4px; }
+  .sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-inner::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .sidebar-inner::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+  .sidebar h2 { text-align: center; font-size: 1.6rem; margin-bottom: 20px; letter-spacing: 1px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; flex-shrink: 0; }
+  .profile { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+  .profile img { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #60a5fa; margin-bottom: 8px; object-fit: cover; }
+  .profile h3 { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
+  .profile p { font-size: 0.8rem; color: #94a3b8; margin-top: 2px; }
+
+  .nav-links { list-style: none; flex: 1; padding: 0 4px 8px 0; }
+  .nav-links li { margin-bottom: 4px; }
+  .nav-links li a { text-decoration: none; color: #94a3b8; display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 10px; transition: all 0.25s ease; font-weight: 500; font-size: 15px; }
+  .nav-links li a i { width: 22px; font-size: 17px; }
+  .nav-links li a:hover { background: rgba(96, 165, 250, 0.08); color: #e2e8f0; }
+  .nav-links li a.active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+  .nav-links li a.analytics-link { background: rgba(231, 76, 60, 0.12); border: 1px solid rgba(231, 76, 60, 0.25); margin-top: 6px; }
+  .nav-links li a.analytics-link:hover { background: rgba(231, 76, 60, 0.2); }
+
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; backdrop-filter: blur(4px); }
+  .overlay.active { display: block; }
+
+  .content { flex-grow: 1; margin-left: 280px; padding: 30px 40px; height: 100vh; overflow-y: auto; background: #f0f2f8; }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+  .content::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+  .page-header { margin-bottom: 20px; }
+  .page-header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+  .page-header p { color: #64748b; font-size: 13px; }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+
+  .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px auto; }
+  .stat-card h3 { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 800; color: #0f172a; }
+  .stat-sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+  /* Attendance Section */
+  .attendance-section {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .camera-box { flex: 1; min-width: 300px; position: relative; }
+  #video { width: 100%; max-width: 480px; border-radius: 16px; background: #0f172a; border: 2px solid #10b981; }
+  .detection-status { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; pointer-events: none; z-index: 10; }
+
+  .cooldown-overlay { position: absolute; top: 0; left: 0; width: 100%; max-width: 480px; height: 100%; background: rgba(0,0,0,0.7); border-radius: 16px; display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 20; }
+  .cooldown-overlay.show { display: flex; }
+  .cooldown-number { font-size: 72px; font-weight: 800; color: #10b981; animation: pulse 1s infinite; }
+  .cooldown-label { color: white; font-size: 18px; font-weight: 600; margin-top: 8px; }
+
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
+
+  .controls-box { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 12px; }
+  .camera-row { display: flex; gap: 20px; flex-wrap: wrap; }
+
+  .cam-btn { padding: 12px 20px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; width: 100%; }
+  .cam-btn-primary { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; }
+  .cam-btn-success { background: #10b981; color: white; }
+  .cam-btn-danger { background: #ef4444; color: white; }
+  .cam-btn-secondary { background: #64748b; color: white; }
+  .cam-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
+  .cam-btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+  .cam-btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
+
+  .status-box { padding: 12px; border-radius: 12px; text-align: center; margin-top: 8px; }
+  .status-success { background: #d1fae5; color: #065f46; }
+  .status-error { background: #fee2e2; color: #991b1b; }
+  .status-info { background: #dbeafe; color: #1e40af; }
+  .status-warning { background: #fed7aa; color: #92400e; }
+
+  /* ===== TABS ===== */
+  .tabs-container {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .tabs-header {
     display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 4px;
+  }
+
+  .tab-btn {
+    padding: 10px 24px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #94a3b8;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover {
+    color: #64748b;
+    background: #f1f5f9;
+  }
+
+  .tab-btn.active {
+    color: #3b82f6;
+    background: #dbeafe;
+    border-bottom: 3px solid #3b82f6;
+  }
+
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Face Grid inside tab */
+  .face-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .face-item {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .face-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+  .face-item .avatar { font-size: 40px; display: block; margin-bottom: 8px; }
+  .face-item .name { font-weight: 600; color: #0f172a; font-size: 14px; }
+  .face-item .email { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .face-item .unique-id { font-size: 10px; color: #10b981; margin-top: 4px; }
+  .face-item .actions { margin-top: 10px; display: flex; gap: 6px; justify-content: center; }
+  .face-item .actions button { padding: 4px 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
+  .btn-edit { background: #f59e0b; color: white; }
+  .btn-delete { background: #ef4444; color: white; }
+
+  /* Table */
+  .attendance-records {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .table-wrapper { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+  th { background: #f8fafc; font-weight: 600; color: #64748b; font-size: 12px; }
+
+  .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .status-completed { background: #d1fae5; color: #065f46; }
+  .status-pending { background: #fed7aa; color: #92400e; }
+
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 2001; display: none; }
+  .toast.show { display: block; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .filter-bar input, .filter-bar select { padding: 8px 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 13px; flex: 1; min-width: 150px; }
+  .filter-bar .cam-btn { padding: 8px 16px; width: auto; min-width: 80px; }
+
+  .loading { text-align: center; padding: 30px; color: #94a3b8; }
+
+  .auto-badge { display: inline-block; background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; animation: pulse 2s infinite; }
+
+  .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
+  .section-title-left { display: flex; align-items: center; gap: 10px; }
+  .section-title h2 { font-size: 18px; font-weight: 600; color: #0f172a; }
+  .badge { padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-success { background: #10b981; color: white; }
+  .badge-warning { background: #f59e0b; color: white; }
+  .badge-info { background: #3b82f6; color: white; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-    margin: 30px;
-}
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.active { display: flex; }
 
-/* Main Card maximized */
-.attendance-card {
-    background: rgba(255,255,255,0.95);
-    color: #1a2a6c;
-    border-radius: 15px;
-    width: 98vw;
-    max-width: 1600px; /* bigger max width */
-    height: 98%;        /* fill more height */
+  .modal-content {
+    background: white;
+    border-radius: 24px;
     padding: 30px;
-    display: flex;
-    flex-direction: column;
+    max-width: 600px;
+    width: 95%;
+    max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-}
+    animation: modalPop 0.3s ease;
+  }
 
-/* Hide scrollbars */
-.attendance-card::-webkit-scrollbar { width: 0; background: transparent; }
-.attendance-card { -ms-overflow-style: none; scrollbar-width: none; }
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
 
-h2 {
-    text-align: center;
-    font-weight: 700;
-    margin-bottom: 10px;
-    background: -webkit-linear-gradient(#2575fc, #6a11cb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-p.description {
-    text-align: center;
-    color: #333;
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-}
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .modal-header h2 { font-size: 22px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+  .modal-header h2 i { color: #3b82f6; }
+  .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: #94a3b8; transition: 0.3s; }
+  .modal-close:hover { color: #ef4444; transform: rotate(90deg); }
 
-/* Buttons */
-.btn-checkin, .btn-checkout {
-    border: none;
-    border-radius: 50px;
-    padding: 12px 30px;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 150px;
-    margin-bottom: 5px;
-    transition: all 0.3s ease;
-}
-.btn-checkin { background: linear-gradient(45deg, #2575fc, #6a11cb); color:#fff; }
-.btn-checkin:hover { background: linear-gradient(45deg,#1a5ce6,#550ebf); transform: scale(1.05); }
-.btn-checkout { background: linear-gradient(45deg,#00c6ff,#0072ff); color:#fff; }
-.btn-checkout:hover { background: linear-gradient(45deg,#00b0e6,#005fd1); transform: scale(1.05); }
+  .modal-body { display: flex; flex-direction: column; gap: 16px; }
+  .modal-body .select-group { width: 100%; }
+  .modal-body .select-group label { font-size: 13px; font-weight: 600; color: #64748b; display: block; margin-bottom: 4px; }
+  .modal-body .select-group select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 14px; background: white; }
 
-/* Table */
-table {
-    border-radius: 12px;
-    overflow: hidden;
-    width: 100%;
-    background: #fdfdfd;
-}
+  .modal-camera-box { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #0f172a; border: 2px solid #3b82f6; }
+  #regVideo { width: 100%; display: block; }
+  .modal-reg-status { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; pointer-events: none; z-index: 10; }
 
-/* Table header: solid blue and white text */
-table thead th {
-    background-color: #2575fc !important; /* solid blue */
-    color: #fff !important;               /* white text */
-    text-transform: uppercase;
-    padding: 14px;
-}
+  .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .modal-actions .cam-btn { flex: 1; min-width: 120px; }
+  .modal-status-box { padding: 12px; border-radius: 12px; text-align: center; font-size: 14px; }
 
-tbody tr:nth-child(even) { background-color: #f4f6fb; }
-tbody tr:hover { background-color: #dde4f0; }
+  @media (max-width: 1024px) {
+    .camera-row { flex-direction: column; }
+    #video { max-width: 100%; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
 
-caption { caption-side: top; text-align:center; font-weight:600; color:#1a2a6c; padding-bottom:10px; }
+  @media (max-width: 768px) {
+    .menu-toggle { display: flex; }
+    .sidebar { position: fixed; left: -280px; top: 0; height: 100vh; box-shadow: none; }
+    .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+    .content { margin-left: 0; padding: 70px 16px 30px 16px; height: 100vh; }
+    .filter-bar { flex-direction: column; }
+    .filter-bar input, .filter-bar select { width: 100%; }
+    .face-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-card { padding: 14px; }
+    .stat-value { font-size: 22px; }
+    .modal-content { padding: 20px; }
+    .modal-actions { flex-direction: column; }
+    .tabs-header { overflow-x: auto; flex-wrap: nowrap; }
+    .tab-btn { padding: 8px 14px; font-size: 12px; white-space: nowrap; }
+  }
 </style>
 </head>
-
 <body>
-<div class="main-container">
-    <div class="attendance-card">
-        <h2>Admin Attendance Tracker</h2>
-        <p class="description">Monitor and manage daily attendance records of all registered users.</p>
+  <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+  <div class="overlay" id="overlay"></div>
 
-        <!-- User Dropdown -->
-        <div class="mb-3">
-            <label for="userSelect" class="form-label">Select User:</label>
-            <select id="userSelect" class="form-select">
-                <option value="">-- Select User --</option>
-            </select>
-        </div>
-
-        <!-- Buttons -->
-        <div class="text-center mb-4 d-flex justify-content-center flex-wrap gap-3">
-            <button id="checkInBtn" class="btn btn-checkin">Check In</button>
-            <button id="checkOutBtn" class="btn btn-checkout">Check Out</button>
-        </div>
-
-        <!-- Filters -->
-        <div class="row g-2 mb-4">
-            <div class="col-md-4"><input type="text" id="filterInput" class="form-control" placeholder="Search by user name..."></div>
-            <div class="col-md-3">
-                <select id="statusFilter" class="form-select">
-                    <option value="all">All</option>
-                    <option value="completed"> Completed</option>
-                    <option value="pending"> Pending Checkout</option>
-                </select>
-            </div>
-            <div class="col-md-2"><input type="date" id="fromDate" class="form-control"></div>
-            <div class="col-md-2"><input type="date" id="toDate" class="form-control"></div>
-        </div>
-
-        <!-- Attendance Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered caption-top align-middle text-center" id="attendanceTable">
-                <caption>Attendance Records Overview</caption>
-                <thead>
-                    <tr><th>User</th><th>Check In Date & Time</th><th>Check Out Date & Time</th></tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <p class="text-center text-muted mt-3">
-             Completed – Users who have both check-in and check-out entries.<br>
-             Pending – Users who have checked in but not checked out yet.
-        </p>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h2><i class="fas fa-crown"></i> PGMS Admin</h2>
+      <div class="profile">
+        <img src="profile.jpg" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff'">
+        <h3>ADMIN</h3>
+        <p>Administrator</p>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="registrations.html"><i class="fas fa-users"></i> Registrations</a></li>
+        <li><a href="rooms.html"><i class="fas fa-door-open"></i> Rooms</a></li>
+        <li class="active"><a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+        <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+        <li><a href="enquiries.html"><i class="fas fa-envelope"></i> Enquiries</a></li>
+        <li><a href="complaints.html"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+        <li><a href="payments.html"><i class="fas fa-chart-line"></i> Payments</a></li>
+        <li><a href="mealplan.html"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+        <li><a href="analytics.html" class="analytics-link"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+      </ul>
     </div>
-</div>
+  </div>
+
+  <div class="content">
+    <div class="page-header">
+      <h1>Face Recognition Attendance</h1>
+      <p>Automatic attendance tracking with face recognition</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #dbeafe; color: #3b82f6;"><i class="fas fa-users"></i></div>
+        <h3>Today's Total</h3>
+        <div class="stat-value" id="todayTotal">0</div>
+        <div class="stat-sub">Registered users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #10b981;"><i class="fas fa-check-circle"></i></div>
+        <h3>Present</h3>
+        <div class="stat-value" id="presentCount">0</div>
+        <div class="stat-sub">Checked in today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #fee2e2; color: #ef4444;"><i class="fas fa-times-circle"></i></div>
+        <h3>Absent</h3>
+        <div class="stat-value" id="absentCount">0</div>
+        <div class="stat-sub">Not checked in</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #e0e7ff; color: #6366f1;"><i class="fas fa-percentage"></i></div>
+        <h3>Attendance Rate</h3>
+        <div class="stat-value" id="attendanceRate">0%</div>
+        <div class="stat-sub">Today's efficiency</div>
+      </div>
+    </div>
+
+    <!-- ===== ATTENDANCE SECTION ===== -->
+    <div class="attendance-section">
+      <div class="section-title">
+        <div class="section-title-left">
+          <h2><i class="fas fa-video"></i> Automatic Attendance</h2>
+          <span class="badge badge-success auto-badge"><i class="fas fa-sync-alt fa-spin"></i> Auto-detecting</span>
+          <span class="badge badge-warning" id="attStatusBadge">Waiting</span>
+        </div>
+        <button class="cam-btn cam-btn-primary" id="openRegisterModalBtn" style="padding: 10px 20px; width: auto; min-width: 140px;">
+          <i class="fas fa-user-plus"></i> Register Face
+        </button>
+      </div>
+      <div class="camera-row">
+        <div class="camera-box">
+          <video id="video" autoplay playsinline></video>
+          <div class="cooldown-overlay" id="cooldownOverlay">
+            <div class="cooldown-number" id="cooldownNumber">5</div>
+            <div class="cooldown-label">⏳ Cooldown - Please wait</div>
+          </div>
+          <div class="detection-status" id="detectionStatus">🔴 Attendance Camera Off</div>
+        </div>
+        <div class="controls-box">
+          <button class="cam-btn cam-btn-primary" id="startCameraBtn"><i class="fas fa-camera"></i> Start Attendance Camera</button>
+          <button class="cam-btn cam-btn-danger" id="stopCameraBtn"><i class="fas fa-stop"></i> Stop Attendance Camera</button>
+          <div id="statusMessage" class="status-box status-info">Start attendance camera for automatic detection</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TABS: Registered Faces + Attendance Records ===== -->
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="faces"><i class="fas fa-users"></i> Registered Faces <span class="badge badge-success" id="faceCount" style="font-size: 10px; padding: 1px 8px;">0</span></button>
+        <button class="tab-btn" data-tab="records"><i class="fas fa-history"></i> Attendance Records <span class="badge badge-warning" id="todayCount" style="font-size: 10px; padding: 1px 8px;">0</span></button>
+      </div>
+
+      <!-- Tab 1: Registered Faces -->
+      <div class="tab-content active" id="tabFaces">
+        <div id="faceGrid" class="face-grid">
+          <div class="loading">Loading registered faces...</div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Attendance Records -->
+      <div class="tab-content" id="tabRecords">
+        <div class="filter-bar">
+          <input type="text" id="filterInput" placeholder="Search by user name...">
+          <select id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending Checkout</option>
+          </select>
+          <input type="date" id="fromDate">
+          <input type="date" id="toDate">
+          <button class="cam-btn cam-btn-primary" onclick="loadAttendance()" style="padding: 8px 16px; width: auto;">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>User</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Verified</th></tr></thead>
+            <tbody id="attendanceBody"><tr><td colspan="5" class="loading">Loading records...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REGISTRATION MODAL ===== -->
+  <div class="modal-overlay" id="registerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fas fa-user-plus"></i> Face Registration</h2>
+        <button class="modal-close" id="closeRegisterModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="select-group">
+          <label><i class="fas fa-user"></i> Select User</label>
+          <select id="modalUserSelect">
+            <option value="">-- Select User --</option>
+          </select>
+        </div>
+        <div class="modal-camera-box">
+          <video id="regVideo" autoplay playsinline></video>
+          <div class="modal-reg-status" id="modalRegStatus">🔴 Registration Camera Off</div>
+        </div>
+        <div class="modal-actions">
+          <button class="cam-btn cam-btn-primary" id="modalStartCamera"><i class="fas fa-camera"></i> Start Camera</button>
+          <button class="cam-btn cam-btn-success" id="modalRegisterFaceBtn"><i class="fas fa-user-plus"></i> Register</button>
+          <button class="cam-btn cam-btn-danger" id="modalStopCamera"><i class="fas fa-stop"></i> Stop Camera</button>
+        </div>
+        <div id="modalStatusMessage" class="modal-status-box status-info">Start camera to register face</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 
 <script>
-    const userSelect = document.getElementById('userSelect');
-    const checkInBtn = document.getElementById('checkInBtn');
-    const checkOutBtn = document.getElementById('checkOutBtn');
-    const attendanceTableBody = document.querySelector('#attendanceTable tbody');
+// ===== SIDEBAR JAVASCRIPT =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 
-    const filterInput = document.getElementById('filterInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const fromDate = document.getElementById('fromDate');
-    const toDate = document.getElementById('toDate');
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
 
-    let attendanceRecords = [];
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
 
-    async function loadUsers() {
-        try {
-            const res = await fetch('/api/users');
-            const users = await res.json();
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user._id;
-                option.textContent = user.name;
-                userSelect.appendChild(option);
-            });
-        } catch (err) {
-            console.error(err);
-        }
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (overlay) overlay.addEventListener('click', closeMenu);
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// ===== TOAST FUNCTION =====
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#ef4444' : '#10b981';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== SET STATUS FUNCTIONS =====
+function setStatus(message, type = 'info') {
+  const statusBox = document.getElementById('statusMessage');
+  statusBox.textContent = message;
+  statusBox.className = `status-box status-${type}`;
+  document.getElementById('attStatusBadge').textContent = type.toUpperCase();
+  document.getElementById('attStatusBadge').className = `badge badge-${type}`;
+}
+
+function setModalStatus(message, type = 'info') {
+  const statusBox = document.getElementById('modalStatusMessage');
+  statusBox.textContent = message;
+  statusBox.className = `modal-status-box status-${type}`;
+  document.getElementById('modalRegStatus').textContent = message;
+}
+
+// ===== TABS =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1)).classList.add('active');
+  });
+});
+
+// ===== LOAD MODELS =====
+async function loadModels() {
+  try {
+    setStatus('Loading face recognition models...', 'info');
+    const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    setStatus('✅ Models ready!', 'success');
+    return true;
+  } catch (err) {
+    console.error('Error loading models:', err);
+    setStatus('Error loading models.', 'error');
+    return false;
+  }
+}
+
+// ===== LOAD USERS =====
+async function loadUsers() {
+  try {
+    const res = await fetch('/users');
+    const users = await res.json();
+    const modalSelect = document.getElementById('modalUserSelect');
+    modalSelect.innerHTML = '<option value="">-- Select User --</option>';
+    if (Array.isArray(users)) {
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user._id;
+        option.textContent = user.name;
+        modalSelect.appendChild(option);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ===== UPDATE STATS =====
+async function updateStats() {
+  try {
+    const res = await fetch('/api/attendance/stats');
+    const data = await res.json();
+    if (data.success && data.stats) {
+      document.getElementById('todayTotal').textContent = data.stats.totalUsers || 0;
+      document.getElementById('presentCount').textContent = data.stats.presentToday || 0;
+      document.getElementById('absentCount').textContent = data.stats.absentToday || 0;
+      document.getElementById('attendanceRate').textContent = data.stats.attendanceRate + '%' || '0%';
+    }
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+  }
+}
+
+// ===== LOAD ATTENDANCE =====
+async function loadAttendance() {
+  const tbody = document.getElementById('attendanceBody');
+  tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading...</td></tr>';
+
+  try {
+    const res = await fetch('/api/attendance/admin/all');
+    let records = await res.json();
+
+    const filterText = document.getElementById('filterInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const from = document.getElementById('fromDate').value;
+    const to = document.getElementById('toDate').value;
+
+    records = records.filter(record => {
+      const name = (record.user?.name || '').toLowerCase();
+      const checkInDate = new Date(record.checkIn);
+      
+      let statusMatch = true;
+      if (status === 'completed') statusMatch = !!record.checkOut;
+      else if (status === 'pending') statusMatch = !record.checkOut;
+
+      let dateMatch = true;
+      if (from) dateMatch = checkInDate >= new Date(from + 'T00:00:00');
+      if (to && dateMatch) dateMatch = checkInDate <= new Date(to + 'T23:59:59');
+
+      return name.includes(filterText) && statusMatch && dateMatch;
+    });
+
+    const today = new Date().toLocaleDateString();
+    const todayRecords = records.filter(r => new Date(r.checkIn).toLocaleDateString() === today);
+    document.getElementById('todayCount').textContent = todayRecords.length;
+
+    if (records.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">No records found</td></tr>';
+      return;
     }
 
-    async function loadAttendance() {
-        try {
-            const res = await fetch('/api/attendance/admin/all');
-            attendanceRecords = await res.json();
-            renderAttendance();
-        } catch (err) {
-            console.error(err);
-        }
+    tbody.innerHTML = records.map(record => {
+      const statusClass = record.checkOut ? 'status-completed' : 'status-pending';
+      const statusText = record.checkOut ? 'Completed' : 'Pending';
+      const verified = record.faceVerified ? '✅ Yes' : '❌ No';
+      return `
+        <tr>
+          <td><strong>${record.user?.name || 'Unknown'}</strong></td>
+          <td>${record.checkIn ? new Date(record.checkIn).toLocaleString() : '-'}</td>
+          <td>${record.checkOut ? new Date(record.checkOut).toLocaleString() : '-'}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td>${verified}</td>
+        </tr>
+      `;
+    }).join('');
+    
+    await updateStats();
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = '<tr><td colspan="5" class="loading" style="color: #ef4444;">Error loading records</td></tr>';
+  }
+}
+
+// ===== LOAD REGISTERED FACES =====
+async function loadRegisteredFaces() {
+  const grid = document.getElementById('faceGrid');
+  grid.innerHTML = '<div class="loading">Loading...</div>';
+  
+  try {
+    const res = await fetch('/api/face/registered');
+    const data = await res.json();
+    
+    if (data.success && data.faces.length > 0) {
+      document.getElementById('faceCount').textContent = data.faces.length;
+      grid.innerHTML = data.faces.map(face => `
+        <div class="face-item">
+          <span class="avatar">👤</span>
+          <div class="name">${face.userId?.name || 'Unknown'}</div>
+          <div class="email">${face.userId?.email || 'No email'}</div>
+          <div class="unique-id"><i class="fas fa-check-circle"></i> Unique Face</div>
+          <small style="color:#94a3b8;">${new Date(face.registeredAt).toLocaleDateString()}</small>
+          <div class="actions">
+            <button class="btn-edit" onclick="editFace('${face.userId?._id}')"><i class="fas fa-edit"></i></button>
+            <button class="btn-delete" onclick="deleteFace('${face.userId?._id}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('faceCount').textContent = '0';
+      grid.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:30px;">No faces registered yet.<br><small>Click "Register Face" to add a new face.</small></div>';
     }
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = '<div style="color:#ef4444; text-align:center; padding:20px;">Error loading faces</div>';
+  }
+}
 
-    function renderAttendance() {
-        const filterText = filterInput.value.toLowerCase();
-        const status = statusFilter.value;
-        const from = fromDate.value ? new Date(fromDate.value + 'T00:00:00') : null;
-        const to = toDate.value ? new Date(toDate.value + 'T23:59:59') : null;
-
-        attendanceTableBody.innerHTML = '';
-
-        attendanceRecords.forEach(record => {
-            const userName = record.user.name.toLowerCase();
-            const checkInDate = new Date(record.checkIn);
-            const checkOutDate = record.checkOut ? new Date(record.checkOut) : null;
-
-            let statusMatch = true;
-            if (status === 'completed') statusMatch = !!record.checkOut;
-            else if (status === 'pending') statusMatch = !record.checkOut;
-
-            let dateMatch = true;
-            if (from && checkInDate < from) dateMatch = false;
-            if (to && checkInDate > to) dateMatch = false;
-
-            const nameMatch = userName.includes(filterText);
-
-            if (statusMatch && dateMatch && nameMatch) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${record.user.name}</td>
-                    <td>${checkInDate.toLocaleString()}</td>
-                    <td>${checkOutDate ? checkOutDate.toLocaleString() : '-'}</td>
-                `;
-                attendanceTableBody.appendChild(tr);
-            }
+// ===== EDIT FACE =====
+async function editFace(userId) {
+  const newName = prompt('Enter new name for this user:');
+  if (newName) {
+    try {
+      const res = await fetch(`/admin/user/${userId}`);
+      const data = await res.json();
+      if (data.success) {
+        const updateRes = await fetch(`/admin/user/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
         });
+        if (updateRes.ok) {
+          showToast('User name updated successfully!');
+          loadRegisteredFaces();
+          loadUsers();
+        }
+      }
+    } catch (err) {
+      showToast('Error updating user', true);
+    }
+  }
+}
+
+// ===== DELETE FACE =====
+async function deleteFace(userId) {
+  if (!confirm('Remove this face registration?')) return;
+  try {
+    const res = await fetch(`/api/face/delete/${userId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Face registration removed');
+      loadRegisteredFaces();
+    }
+  } catch (err) {
+    showToast('Error deleting face', true);
+  }
+}
+
+// ================================
+// ===== REGISTRATION MODAL =====
+// ================================
+const registerModal = document.getElementById('registerModal');
+const openModalBtn = document.getElementById('openRegisterModalBtn');
+const closeModalBtn = document.getElementById('closeRegisterModalBtn');
+
+openModalBtn.addEventListener('click', () => {
+  registerModal.classList.add('active');
+  loadModalUsers();
+});
+
+closeModalBtn.addEventListener('click', () => {
+  registerModal.classList.remove('active');
+  if (modalStream) {
+    modalStream.getTracks().forEach(track => track.stop());
+    document.getElementById('regVideo').srcObject = null;
+    isModalCameraRunning = false;
+    document.getElementById('modalRegStatus').textContent = '🔴 Registration Camera Off';
+    setModalStatus('Camera stopped.', 'info');
+  }
+});
+
+registerModal.addEventListener('click', (e) => {
+  if (e.target === registerModal) closeModalBtn.click();
+});
+
+async function loadModalUsers() {
+  try {
+    const res = await fetch('/users');
+    const users = await res.json();
+    const select = document.getElementById('modalUserSelect');
+    select.innerHTML = '<option value="">-- Select User --</option>';
+    if (Array.isArray(users)) {
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user._id;
+        option.textContent = user.name;
+        select.appendChild(option);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ===== MODAL CAMERA =====
+let modalStream = null;
+let isModalCameraRunning = false;
+
+document.getElementById('modalStartCamera').addEventListener('click', async () => {
+  try {
+    modalStream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 } });
+    document.getElementById('regVideo').srcObject = modalStream;
+    await document.getElementById('regVideo').play();
+    isModalCameraRunning = true;
+    document.getElementById('modalRegStatus').textContent = '🟢 Registration Camera Active';
+    setModalStatus('Registration camera ready. Select user and register face.', 'success');
+  } catch (err) {
+    console.error('Camera error:', err);
+    setModalStatus('Unable to access camera.', 'error');
+  }
+});
+
+document.getElementById('modalStopCamera').addEventListener('click', () => {
+  if (modalStream) {
+    modalStream.getTracks().forEach(track => track.stop());
+    document.getElementById('regVideo').srcObject = null;
+    isModalCameraRunning = false;
+    document.getElementById('modalRegStatus').textContent = '🔴 Registration Camera Off';
+    setModalStatus('Registration camera stopped.', 'info');
+  }
+});
+
+// ===== MODAL REGISTER FACE =====
+document.getElementById('modalRegisterFaceBtn').addEventListener('click', async () => {
+  if (!isModalCameraRunning) {
+    setModalStatus('Please start the registration camera first!', 'error');
+    return;
+  }
+
+  const userId = document.getElementById('modalUserSelect').value;
+  if (!userId) {
+    setModalStatus('Please select a user first!', 'error');
+    return;
+  }
+
+  try {
+    const detections = await faceapi.detectSingleFace(document.getElementById('regVideo'), new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!detections) {
+      setModalStatus('No face detected. Position face clearly.', 'error');
+      return;
     }
 
-    filterInput.addEventListener('keyup', renderAttendance);
-    statusFilter.addEventListener('change', renderAttendance);
-    fromDate.addEventListener('change', renderAttendance);
-    toDate.addEventListener('change', renderAttendance);
+    const newDescriptor = Array.from(detections.descriptor);
 
-    checkInBtn.addEventListener('click', async () => {
-        const userId = userSelect.value;
-        if (!userId) return alert('Select a user first!');
-        try {
-            const res = await fetch('/api/attendance/checkin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
-            const data = await res.json();
-            if (!res.ok && data.message) throw new Error(data.message);
-            loadAttendance();
-        } catch (err) {
-            alert(err.message);
+    const res = await fetch('/api/face/registered');
+    const data = await res.json();
+    
+    if (data.success && data.faces.length > 0) {
+      let isDuplicate = false;
+      let duplicateUser = null;
+      const threshold = 0.6;
+
+      for (const face of data.faces) {
+        const distance = faceapi.euclideanDistance(newDescriptor, face.faceDescriptor);
+        if (distance < threshold) {
+          isDuplicate = true;
+          duplicateUser = face.userId;
+          break;
         }
-    });
+      }
 
-    checkOutBtn.addEventListener('click', async () => {
-        const userId = userSelect.value;
-        if (!userId) return alert('Select a user first!');
-        try {
-            const res = await fetch('/api/attendance/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            });
-            const data = await res.json();
-            if (!res.ok && data.message) throw new Error(data.message);
-            loadAttendance();
-        } catch (err) {
-            alert(err.message);
+      if (isDuplicate) {
+        setModalStatus(`❌ Face already registered for ${duplicateUser?.name || 'another user'}!`, 'error');
+        showToast(`❌ Face already registered! Each face must be unique.`, true);
+        return;
+      }
+    }
+
+    const registerRes = await fetch('/api/face/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, faceDescriptor: newDescriptor })
+    });
+    const registerData = await registerRes.json();
+
+    if (registerData.success) {
+      setModalStatus('✅ Unique face registered successfully!', 'success');
+      showToast('✅ Unique face registered successfully!');
+      loadRegisteredFaces();
+      loadUsers();
+      setTimeout(() => closeModalBtn.click(), 1500);
+    } else {
+      setModalStatus('Error: ' + registerData.message, 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    setModalStatus('Error: ' + err.message, 'error');
+  }
+});
+
+// ================================
+// ===== ATTENDANCE CAMERA =====
+// ================================
+let stream = null;
+let isCameraRunning = false;
+let detectionInterval = null;
+let isCooldown = false;
+let isProcessing = false;
+
+const LAST_ACTION_KEY = 'attendance_last_action';
+
+function getLastAction(userId) {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(LAST_ACTION_KEY) || '{}');
+    return data[userId] || null;
+  } catch {
+    return null;
+  }
+}
+
+function setLastAction(userId, actionType) {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(LAST_ACTION_KEY) || '{}');
+    data[userId] = { action: actionType, timestamp: Date.now() };
+    sessionStorage.setItem(LAST_ACTION_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore
+  }
+}
+
+const MIN_ACTION_INTERVAL = 30000;
+
+document.getElementById('startCameraBtn').addEventListener('click', async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 } });
+    document.getElementById('video').srcObject = stream;
+    await document.getElementById('video').play();
+    isCameraRunning = true;
+    document.getElementById('detectionStatus').textContent = '🟢 Scanning for faces...';
+    setStatus('Automatic detection active.', 'success');
+    
+    if (detectionInterval) clearInterval(detectionInterval);
+    detectionInterval = setInterval(automaticFaceDetection, 2000);
+  } catch (err) {
+    console.error('Camera error:', err);
+    setStatus('Unable to access camera.', 'error');
+  }
+});
+
+document.getElementById('stopCameraBtn').addEventListener('click', () => {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    document.getElementById('video').srcObject = null;
+    isCameraRunning = false;
+    document.getElementById('detectionStatus').textContent = '🔴 Attendance Camera Off';
+    if (detectionInterval) {
+      clearInterval(detectionInterval);
+      detectionInterval = null;
+    }
+    setStatus('Attendance camera stopped.', 'info');
+  }
+});
+
+function startCooldown() {
+  isCooldown = true;
+  const overlay = document.getElementById('cooldownOverlay');
+  const numberDisplay = document.getElementById('cooldownNumber');
+  
+  overlay.classList.add('show');
+  document.getElementById('detectionStatus').textContent = '⏳ Cooldown...';
+  
+  let seconds = 3;
+  numberDisplay.textContent = seconds;
+  
+  const interval = setInterval(() => {
+    seconds--;
+    numberDisplay.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(interval);
+      overlay.classList.remove('show');
+      isCooldown = false;
+      isProcessing = false;
+      document.getElementById('detectionStatus').textContent = '🟢 Scanning for faces...';
+    }
+  }, 1000);
+}
+
+// ===== AUTOMATIC FACE DETECTION =====
+async function automaticFaceDetection() {
+  if (!isCameraRunning || isCooldown || isProcessing) return;
+  
+  try {
+    const detections = await faceapi.detectSingleFace(document.getElementById('video'), new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!detections) {
+      document.getElementById('detectionStatus').textContent = '🟡 No face detected';
+      return;
+    }
+
+    document.getElementById('detectionStatus').textContent = '🟢 Face detected! Matching...';
+    
+    const currentDescriptor = Array.from(detections.descriptor);
+
+    const res = await fetch('/api/face/registered');
+    const data = await res.json();
+
+    if (!data.success || data.faces.length === 0) {
+      document.getElementById('detectionStatus').textContent = '🟡 No registered faces';
+      return;
+    }
+
+    let matchedUser = null;
+    let minDistance = 0.6;
+
+    for (const face of data.faces) {
+      const registeredDescriptor = face.faceDescriptor;
+      const distance = faceapi.euclideanDistance(currentDescriptor, registeredDescriptor);
+      if (distance < minDistance) {
+        minDistance = distance;
+        matchedUser = face.userId;
+      }
+    }
+
+    if (!matchedUser) {
+      document.getElementById('detectionStatus').textContent = '❌ Face not recognized';
+      return;
+    }
+
+    const userName = matchedUser.name || 'User';
+    document.getElementById('detectionStatus').textContent = `✅ Recognized: ${userName}`;
+
+    isProcessing = true;
+
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const attRes = await fetch(`/attendance/user/${matchedUser._id}`);
+      let records = [];
+      
+      if (attRes.ok) {
+        records = await attRes.json();
+      }
+
+      let hasActiveCheckIn = false;
+      
+      if (Array.isArray(records)) {
+        for (const record of records) {
+          const recordDate = new Date(record.date);
+          recordDate.setHours(0, 0, 0, 0);
+          if (recordDate.getTime() === today.getTime() && !record.checkOut) {
+            hasActiveCheckIn = true;
+            break;
+          }
         }
-    });
+      }
 
-    loadUsers();
-    loadAttendance();
+      const lastAction = getLastAction(matchedUser._id);
+      const now = Date.now();
+      
+      let response = null;
+
+      if (!hasActiveCheckIn) {
+        if (lastAction && lastAction.action === 'checkout' && (now - lastAction.timestamp) < MIN_ACTION_INTERVAL) {
+          document.getElementById('detectionStatus').textContent = `⏳ ${userName} - Wait ${Math.ceil((MIN_ACTION_INTERVAL - (now - lastAction.timestamp)) / 1000)}s`;
+          isProcessing = false;
+          return;
+        }
+        
+        console.log('📝 Checking in:', userName);
+        document.getElementById('detectionStatus').textContent = `✅ ${userName} checking in...`;
+        
+        const checkinRes = await fetch('/api/attendance/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: matchedUser._id })
+        });
+        
+        response = await checkinRes.json();
+        
+        if (response.success) {
+          const time = new Date().toLocaleTimeString();
+          showToast(`✅ ${userName} checked in at ${time}`);
+          setStatus(`✅ ${userName} checked in at ${time}`, 'success');
+          document.getElementById('detectionStatus').textContent = `✅ ${userName} checked in ✅`;
+          setLastAction(matchedUser._id, 'checkin');
+          loadAttendance();
+          startCooldown();
+        } else {
+          showToast(`❌ ${response.message || 'Check-in failed'}`, true);
+          isProcessing = false;
+        }
+        
+      } else {
+        if (lastAction && lastAction.action === 'checkin' && (now - lastAction.timestamp) < MIN_ACTION_INTERVAL) {
+          const remaining = Math.ceil((MIN_ACTION_INTERVAL - (now - lastAction.timestamp)) / 1000);
+          document.getElementById('detectionStatus').textContent = `⏳ ${userName} - Wait ${remaining}s`;
+          isProcessing = false;
+          return;
+        }
+        
+        console.log('📝 Checking out:', userName);
+        document.getElementById('detectionStatus').textContent = `✅ ${userName} checking out...`;
+        
+        const checkoutRes = await fetch('/api/attendance/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: matchedUser._id })
+        });
+        
+        response = await checkoutRes.json();
+        
+        if (response.success) {
+          const time = new Date().toLocaleTimeString();
+          showToast(`✅ ${userName} checked out at ${time}`);
+          setStatus(`✅ ${userName} checked out at ${time}`, 'success');
+          document.getElementById('detectionStatus').textContent = `✅ ${userName} checked out ✅`;
+          setLastAction(matchedUser._id, 'checkout');
+          loadAttendance();
+          startCooldown();
+        } else {
+          showToast(`❌ ${response.message || 'Check-out failed'}`, true);
+          isProcessing = false;
+        }
+      }
+      
+    } catch (err) {
+      console.error('Attendance logic error:', err);
+      showToast('Error processing attendance', true);
+      isProcessing = false;
+    }
+    
+  } catch (err) {
+    console.error('Detection error:', err);
+    isProcessing = false;
+  }
+}
+
+// ===== FILTER EVENTS =====
+document.getElementById('filterInput').addEventListener('input', loadAttendance);
+document.getElementById('statusFilter').addEventListener('change', loadAttendance);
+document.getElementById('fromDate').addEventListener('change', loadAttendance);
+document.getElementById('toDate').addEventListener('change', loadAttendance);
+
+// ===== INITIALIZE =====
+loadModels();
+loadUsers();
+loadAttendance();
+loadRegisteredFaces();
+setInterval(() => {
+  loadAttendance();
+  loadRegisteredFaces();
+}, 30000);
 </script>
-
 </body>
 </html>

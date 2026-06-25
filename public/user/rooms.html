@@ -2,374 +2,465 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Room - PGMS</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>My Room | PGMS User</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to bottom right, #e3f2fd, #f8f9fa);
-    min-height: 100vh;
-    display: flex;
-    margin: 0;
-    animation: fadeIn 0.8s ease-in;
+  /* ===== CSS VARIABLES ===== */
+  :root {
+    --primary: #6C63FF;
+    --primary-light: #8B83FF;
+    --primary-dark: #5A52D5;
+    --secondary: #FF6584;
+    --success: #2ECC71;
+    --warning: #F1C40F;
+    --danger: #E74C3C;
+    --purple: #A29BFE;
+    --pink: #FD79A8;
+    --blue: #74B9FF;
+    --cyan: #55EFC4;
+    --dark: #2D3436;
+    --dark-light: #636E72;
+    --gray: #B2BEC3;
+    --light-gray: #DFE6E9;
+    --bg: #F8F9FA;
+    --card-shadow: 0 20px 60px rgba(108, 99, 255, 0.08);
+    --card-shadow-hover: 0 30px 80px rgba(108, 99, 255, 0.15);
+    --border-radius: 24px;
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-   #slip button {
-    background: #2575fc;  /* Blue color */
-    color: white;          /* White text */
-    border: none;
-    padding: 10px 20px;    /* Slightly larger for consistency */
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--dark); overflow-x: hidden; }
 
-#slip button:hover {
-    background: #1a49b0;   /* Darker blue on hover */
-    transform: scale(1.05);
-}
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
 
-
-
-  /* Sidebar */
-  .sidebar {
-    width: 260px;
-    background: linear-gradient(180deg,#1a49b0,#6a11cb);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    padding: 30px 20px;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    overflow-y: auto;
-  }
-
-  .sidebar h2 { text-align: center; font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 1px; }
-  .nav-links { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
-  .nav-links li { margin-bottom: 20px; }
-  .nav-links li a {
-    text-decoration: none;
-    color: #cbd5e1;
-    display: block;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: 0.3s;
-    font-weight: 500;
-  }
-  .nav-links li a:hover { background: rgba(255,255,255,0.15); color: #fff; }
-  .nav-links li a.active { background: #fff; color: #2575fc; font-weight: 600; }
-  .logout-btn {
-    margin-top: auto;
-    padding: 12px 15px;
-    border: none;
-    border-radius: 10px;
-    background: #fff;
-    color: #2575fc;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  .logout-btn:hover { background: #f1f1f1; }
-
-  /* Content */
-  .content { flex-grow: 1; margin-left: 260px; padding: 40px 20px; min-height: 100vh; }
-
-  h1.page-title {
-    font-weight: 700;
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    background: linear-gradient(90deg, #6a11cb, #2575fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeIn 1s ease-in;
-  }
-
-  .payment-card {
-    background: #ffffff;
-    border-radius: 20px;
+  .menu-toggle {
+    position: fixed; top: 16px; left: 16px; z-index: 1001;
+    background: white; border: none; color: var(--dark);
+    width: 48px; height: 48px; border-radius: 16px;
+    font-size: 20px; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
     box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    padding: 30px;
-    max-width: 1200px;
-    margin: auto;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: var(--transition);
   }
-  .payment-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-  }
+  .menu-toggle:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
 
-  .payment-box {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-    margin-bottom: 30px;
+  .sidebar {
+    width: 280px; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; flex-shrink: 0; display: flex; flex-direction: column;
+    padding: 28px 20px; position: fixed; height: 100%;
+    overflow-y: auto; z-index: 1000; transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+  .sidebar.open { left: 0; }
 
-  .payment-box img {
-    width: 220px;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-  }
+  .sidebar-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .sidebar-header .logo-icon { font-size: 32px; background: linear-gradient(135deg, var(--primary-light), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; margin-bottom: 4px; }
+  .sidebar-header h2 { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, #fff, rgba(255,255,255,0.7)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+  .sidebar-header p { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
 
-  .payment-box input {
-    width: 100%;
-    max-width: 250px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #0d6efd;
-    transition: all 0.3s ease;
+  .sidebar-profile {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    margin-bottom: 16px; background: rgba(255,255,255,0.05);
+    border-radius: 16px; cursor: pointer; transition: var(--transition);
+    text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.06);
+    position: relative; overflow: hidden;
   }
-  .payment-box input:focus {
-    outline: none;
-    border-color: #6a11cb;
-    box-shadow: 0 0 8px rgba(106,17,203,0.2);
-  }
+  .sidebar-profile::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(108, 99, 255, 0.1), rgba(255, 101, 132, 0.1)); opacity: 0; transition: var(--transition); }
+  .sidebar-profile:hover::before { opacity: 1; }
+  .sidebar-profile:hover { border-color: rgba(108, 99, 255, 0.3); transform: translateX(4px); }
+  .sidebar-profile-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: white; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.15); overflow: hidden; position: relative; z-index: 1; }
+  .sidebar-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sidebar-profile-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+  .sidebar-profile-info .name { font-size: 14px; font-weight: 600; color: white; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-profile-info .role { font-size: 11px; color: rgba(255,255,255,0.5); display: block; }
+  .sidebar-profile-arrow { color: rgba(255,255,255,0.3); font-size: 12px; transition: var(--transition); position: relative; z-index: 1; }
+  .sidebar-profile:hover .sidebar-profile-arrow { transform: translateX(4px); color: white; }
 
-  .payment-box button {
-    background: #2575fc;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-  }
-  .payment-box button:hover { background: #1a49b0; }
+  .nav-links { list-style: none; flex-grow: 1; padding: 4px 0; }
+  .nav-links li { margin-bottom: 2px; }
+  .nav-links li a { text-decoration: none; color: rgba(255,255,255,0.6); display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 14px; transition: var(--transition); font-weight: 500; font-size: 14px; position: relative; }
+  .nav-links li a i { width: 22px; font-size: 16px; transition: var(--transition); color: rgba(255,255,255,0.4); }
+  .nav-links li a:hover { background: rgba(255,255,255,0.06); color: white; transform: translateX(4px); }
+  .nav-links li a:hover i { color: white; transform: scale(1.1); }
+  .nav-links li a.active { background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(255, 101, 132, 0.1)); color: white; border: 1px solid rgba(108, 99, 255, 0.2); }
+  .nav-links li a.active i { color: var(--primary-light); }
+  .nav-links li a.active::after { content: ''; position: absolute; right: 12px; width: 6px; height: 6px; background: var(--primary-light); border-radius: 50%; box-shadow: 0 0 20px rgba(108, 99, 255, 0.5); }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    border-radius: 10px;
-    overflow: hidden;
+  .logout-btn {
+    margin-top: 8px; padding: 14px; border: none; border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05); color: rgba(255,255,255,0.6);
+    font-weight: 600; cursor: pointer; transition: var(--transition);
+    font-size: 14px; display: flex; align-items: center; justify-content: center;
+    gap: 10px; width: 100%; border: 1px solid rgba(255,255,255,0.05);
   }
-  th, td {
-    padding: 12px;
-    text-align: center;
-  }
-  thead { background: #2575fc; color: #fff; }
-  tbody tr:nth-child(even) { background-color: #e7f1ff; }
-  tbody tr:hover { background-color: #cfe2ff; }
+  .logout-btn:hover { background: rgba(231, 76, 60, 0.15); color: var(--danger); border-color: rgba(231, 76, 60, 0.2); transform: translateY(-2px); }
+  .logout-btn i { transition: var(--transition); }
+  .logout-btn:hover i { transform: translateX(3px); }
 
-  #slip {
-    display: none;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    width: 400px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    margin: 20px auto 0;
-    animation: popUp 0.5s ease forwards;
-  }
-  #slip h3 { text-align: center; color: #2575fc; margin-bottom: 15px; }
+  .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; display: none; backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
+  .overlay.active { display: block; }
 
-  @keyframes popUp {
-    from { opacity: 0; transform: scale(0.8);}
-    to { opacity: 1; transform: scale(1);}
-  }
+  .content { flex-grow: 1; margin-left: 280px; padding: 32px 40px; min-height: 100vh; }
 
-  footer { text-align: center; margin-top: 25px; font-size: 14px; color: #6c757d; }
-  footer span { color: #2575fc; font-weight: 600; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+  .animate-slide-down { animation: slideDown 0.6s ease forwards; opacity: 0; }
+  .animate-slide-up { animation: slideUp 0.6s ease forwards; opacity: 0; }
+  .animate-scale { animation: scaleIn 0.5s ease forwards; opacity: 0; }
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.10s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.20s; }
+
+  .welcome-section {
+    margin-bottom: 28px; padding: 24px 32px;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.05), rgba(255, 101, 132, 0.05));
+    border-radius: var(--border-radius); border: 1px solid rgba(108, 99, 255, 0.08);
+  }
+  .welcome-section h1 { font-size: 28px; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+  .welcome-section h1 span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .welcome-section p { color: var(--dark-light); font-size: 14px; margin-top: 4px; }
+
+  .room-container {
+    max-width: 700px; margin: 0 auto;
+    background: white; border-radius: var(--border-radius); padding: 32px 36px;
+    border: 1px solid rgba(0,0,0,0.04); box-shadow: var(--card-shadow);
+  }
+  .room-header { text-align: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #f1f3f5; }
+  .room-header h1 { font-size: 28px; font-weight: 800; color: var(--dark); }
+  .room-header h1 i { color: var(--primary); margin-right: 10px; }
+  .room-header p { color: var(--dark-light); font-size: 14px; margin-top: 4px; }
+
+  .info-card {
+    background: var(--bg); border-radius: 16px; padding: 16px 20px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center; transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .info-card:hover { transform: translateX(5px); background: #f1f5f9; border-color: var(--primary-light); }
+  .info-label { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--dark-light); font-size: 14px; }
+  .info-label i { width: 24px; font-size: 16px; color: var(--primary); }
+  .info-value { font-weight: 700; color: var(--dark); font-size: 16px; }
+
+  .badge { padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+  .badge-ac { background: rgba(108, 99, 255, 0.12); color: var(--primary-dark); }
+  .badge-nonac { background: #e2e8f0; color: #475569; }
+  .badge-vacancy { background: rgba(46, 204, 113, 0.12); color: #1a8a4a; }
+  .badge-full { background: rgba(231, 76, 60, 0.12); color: var(--danger); }
+
+  .occupants-list {
+    background: var(--bg); border-radius: 16px; padding: 16px 20px; margin-top: 16px;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .occupants-title { font-size: 14px; font-weight: 600; color: var(--dark-light); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .occupants-title i { color: var(--primary); }
+  .occupant-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+  .occupant-item:last-child { border-bottom: none; }
+  .occupant-avatar {
+    width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 14px; font-weight: 600; flex-shrink: 0;
+  }
+  .occupant-name { font-weight: 500; color: var(--dark); }
+  .occupant-badge { margin-left: auto; font-size: 11px; padding: 2px 12px; border-radius: 12px; background: rgba(46, 204, 113, 0.12); color: #1a8a4a; font-weight: 600; }
+
+  .no-room { text-align: center; padding: 50px 20px; }
+  .no-room-icon { font-size: 72px; color: var(--light-gray); margin-bottom: 16px; }
+  .no-room h3 { font-size: 20px; color: var(--dark); margin-bottom: 8px; }
+  .no-room p { color: var(--dark-light); font-size: 14px; }
+
+  .loading-state { text-align: center; padding: 60px 20px; }
+  .loading-state i { font-size: 48px; color: var(--primary); margin-bottom: 12px; display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .loading-state p { color: var(--dark-light); font-size: 14px; }
+
+  .retry-btn {
+    margin-top: 16px; padding: 10px 28px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14px;
+    transition: var(--transition); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108, 99, 255, 0.3); }
+
+  .footer { text-align: center; padding: 20px; font-size: 12px; color: var(--dark-light); margin-top: 20px; }
+  .footer i { color: var(--primary); }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--dark); color: white; padding: 14px 28px; border-radius: 16px;
+    font-size: 14px; z-index: 2001; opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 768px) {
-    .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 15px; }
-    .content { margin-left: 0; padding: 20px; }
-    .nav-links { display: flex; flex-direction: row; gap: 10px; }
-    h1.page-title { font-size: 1.4rem; }
-
-    
+    .menu-toggle { display: flex; }
+    .sidebar { position: fixed; left: -280px; top: 0; box-shadow: none; }
+    .sidebar.open { left: 0; box-shadow: 20px 0 60px rgba(0,0,0,0.3); }
+    .content { margin-left: 0; padding: 80px 16px 30px 16px; }
+    .welcome-section { padding: 20px; }
+    .welcome-section h1 { font-size: 22px; }
+    .room-container { padding: 20px; }
+    .room-header h1 { font-size: 22px; }
+    .info-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .info-value { width: 100%; padding-left: 34px; }
   }
 
-  
-/* ===== Content Area ===== */
-.content {
-  flex-grow: 1;
-  margin-left: 250px;
-  padding: 40px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  animation: fadeIn 1s ease forwards;
-}
-
-/* ===== Room Card ===== */
-.container {
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-  padding: 40px 50px;
-  width: 95%;
-  max-width: 900px;
-  transition: all 0.3s ease;
-  animation: slideInUp 0.8s ease forwards;
-}
-.container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 35px rgba(0,0,0,0.15);
-}
-
-/* ===== Title ===== */
-h1 {
-  font-weight: 700;
-  font-size: 1.8rem;
-  margin-bottom: 25px;
-  background: linear-gradient(90deg, #6a11cb, #2575fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ===== Info Cards ===== */
-.info {
-  margin-bottom: 15px;
-  font-size: 1.05rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 20px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #f0f8ff, #f8fbff);
-  color: #1b0586;
-  transition: 0.3s;
-}
-.info:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-/* ===== Badges ===== */
-.badge {
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
-}
-.type-ac { background-color: #0d6efd; }
-.type-nonac { background-color: #6c757d; }
-.vacancy { background-color: #198754; }
-.full { background-color: #dc3545; }
-
-/* ===== No Room ===== */
-.no-room {
-  color: #dc3545;
-  font-weight: 600;
-  font-size: 1.2rem;
-  text-align: center;
-  padding: 20px 0;
-}
-
-
+  @media (max-width: 480px) {
+    .content { padding: 70px 10px 20px 10px; }
+    .welcome-section h1 { font-size: 18px; }
+    .room-container { padding: 16px; }
+    .room-header h1 { font-size: 20px; }
+    .info-card { padding: 12px 16px; }
+    .occupants-list { padding: 12px 16px; }
+  }
 </style>
 </head>
 <body>
+  <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+  <div class="overlay" id="overlay"></div>
 
-<div class="sidebar">
-  <h2>User Panel</h2>
-  <ul class="nav-links" id="nav-links"></ul>
-  <button class="logout-btn" id="logout-btn">Logout</button>
-</div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon"><i class="fas fa-home"></i></span>
+      <h2>PGMS</h2>
+      <p>Convenience at Your Fingertips</p>
+    </div>
 
-<div class="content">
-  <div class="container">
-    <h1>My Room</h1>
-    <div id="roomInfo">Loading...</div>
+    <a href="profile.html" class="sidebar-profile" id="sidebarProfile">
+      <div class="sidebar-profile-avatar" id="sidebarAvatar">
+        <span id="avatarText">U</span>
+      </div>
+      <div class="sidebar-profile-info">
+        <span class="name" id="sidebarName">User</span>
+        <span class="role" id="sidebarRole">Student</span>
+      </div>
+      <i class="fas fa-chevron-right sidebar-profile-arrow"></i>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+      <li><a href="complaints.html"><i class="fas fa-comment-dots"></i> Complaints</a></li>
+      <li><a href="notifications.html"><i class="fas fa-bell"></i> Notifications</a></li>
+      <li><a href="payments.html"><i class="fas fa-chart-line"></i> Payments</a></li>
+      <li><a href="rooms.html" class="active"><i class="fas fa-door-open"></i> My Room</a></li>
+      <li><a href="mealplan.html"><i class="fas fa-utensils"></i> Meal Plan</a></li>
+      <li><a href="analytics.html"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+    </ul>
+
+    <button class="logout-btn" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
   </div>
-</div>
+
+  <div class="content">
+    <div class="welcome-section animate-slide-down">
+      <h1>My Room</h1>
+      <p>View your assigned room details and roommates</p>
+    </div>
+
+    <div class="room-container animate-slide-up delay-2" id="roomContainer">
+      <div class="loading-state">
+        <i class="fas fa-spinner"></i>
+        <p>Loading room information...</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><i class="fas fa-home"></i> PGMS - Paying Guest Management System</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
 
 <script>
-const navLinks = [
-  { name: 'Attendance', href: 'attendance.html' },
-  { name: 'Complaints', href: 'complaints.html' },
-  { name: 'Notifications', href: 'notifications.html' },
-  { name: 'Payments', href: 'payments.html' },
-  { name: 'Rooms', href: 'rooms.html' },
-  { name: 'Meal Plan', href: 'mealplan.html' }
-];
-
 let currentUser = null;
 
+function showToast(message, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.style.background = isError ? '#E74C3C' : '#2D3436';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ===== SIDEBAR =====
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+function openMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+if (menuToggle) menuToggle.addEventListener('click', openMenu);
+if (overlay) overlay.addEventListener('click', closeMenu);
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) closeMenu();
+  });
+});
+
+// ===== LOAD USER =====
 async function loadUserInfo() {
   try {
     const res = await fetch('/users/me');
-    if(!res.ok) throw new Error('Not logged in');
+    if (!res.ok) throw new Error('Not logged in');
     currentUser = await res.json();
+    
+    const name = currentUser.name || 'User';
+    const role = currentUser.role || 'Student';
+    const avatarText = name.charAt(0).toUpperCase();
 
-    const nav = document.getElementById('nav-links');
-    navLinks.forEach(link => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = link.href;
-      a.textContent = link.name;
-      if(window.location.pathname.includes(link.href)) a.classList.add('active');
-      li.appendChild(a);
-      nav.appendChild(li);
-    });
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = role;
+    document.getElementById('avatarText').textContent = avatarText;
+
+    if (currentUser.profileImage) {
+      document.getElementById('sidebarAvatar').innerHTML = `<img src="${currentUser.profileImage}" alt="${name}">`;
+    }
+    
+    await loadMyRoom();
   } catch(err) {
-    alert('Please login to view page');
+    console.error(err);
     window.location.href = 'login.html';
   }
 }
 
+// ===== LOAD ROOM =====
 async function loadMyRoom() {
+  const container = document.getElementById('roomContainer');
+  
   try {
     const res = await fetch('/users/me');
     if (!res.ok) throw new Error('Failed to fetch user data');
     const user = await res.json();
 
-    const container = document.getElementById('roomInfo');
-    if (!user.room) {
-      container.innerHTML = '<div class="no-room">No room allocated yet.</div>';
+    if (!user.room || !user.room.roomNumber) {
+      container.innerHTML = `
+        <div class="no-room">
+          <div class="no-room-icon"><i class="fas fa-door-closed"></i></div>
+          <h3>No Room Allocated</h3>
+          <p>You haven't been allocated a room yet. Please contact the admin.</p>
+          <button class="retry-btn" onclick="loadMyRoom()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+      `;
       return;
     }
 
     const room = user.room;
-    const vacancyCount = room.sharing - room.occupants.length;
-    const vacancyBadge = vacancyCount > 0 
-      ? `<span class="badge vacancy">${vacancyCount} Vacancy</span>` 
-      : `<span class="badge full">Full</span>`;
+    const occupantCount = room.occupants?.length || 0;
+    const vacancyCount = room.sharing - occupantCount;
+    const isVacant = vacancyCount > 0;
     
-    const typeBadge = room.type === 'AC' 
-      ? '<span class="badge type-ac">AC</span>' 
-      : '<span class="badge type-nonac">Non-AC</span>';
+    const typeBadge = room.type === 'AC' ? '<span class="badge badge-ac">❄️ AC</span>' : '<span class="badge badge-nonac">🌡️ Non-AC</span>';
+    const vacancyBadge = isVacant ? `<span class="badge badge-vacancy">✅ ${vacancyCount} Vacancy</span>` : '<span class="badge badge-full">🔴 Full</span>';
+
+    let occupantsHtml = '';
+    if (room.occupants && room.occupants.length > 0) {
+      occupantsHtml = `
+        <div class="occupants-list">
+          <div class="occupants-title"><i class="fas fa-users"></i> Roommates (${room.occupants.length})</div>
+          ${room.occupants.map((occupant) => {
+            const isYou = occupant._id === user._id;
+            return `<div class="occupant-item">
+              <div class="occupant-avatar">${occupant.name ? occupant.name.charAt(0).toUpperCase() : '?'}</div>
+              <span class="occupant-name">${escapeHtml(occupant.name || 'Unknown')}</span>
+              ${isYou ? '<span class="occupant-badge"><i class="fas fa-user-check"></i> You</span>' : ''}
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    } else {
+      occupantsHtml = `
+        <div class="occupants-list">
+          <div class="occupants-title"><i class="fas fa-users"></i> Roommates</div>
+          <div style="text-align:center; padding:16px; color:var(--dark-light);"><i class="fas fa-user-plus"></i> No other occupants yet</div>
+        </div>
+      `;
+    }
 
     container.innerHTML = `
-      <div class="info"><strong>Room Number:</strong> ${room.roomNumber}</div>
-      <div class="info"><strong>Type:</strong> ${typeBadge}</div>
-      <div class="info"><strong>Sharing:</strong> ${room.sharing}</div>
-      <div class="info"><strong>Occupants:</strong> ${room.occupants.map(u => u.name).join(', ')}</div>
-      <div class="info"><strong>Status:</strong> ${vacancyBadge}</div>
+      <div class="room-header">
+        <h1><i class="fas fa-door-open"></i> My Room</h1>
+        <p>Your assigned room details</p>
+      </div>
+      <div class="info-card">
+        <div class="info-label"><i class="fas fa-hashtag"></i> Room Number</div>
+        <div class="info-value">${room.roomNumber}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label"><i class="fas fa-thermometer-half"></i> Room Type</div>
+        <div class="info-value">${typeBadge}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label"><i class="fas fa-user-friends"></i> Sharing Capacity</div>
+        <div class="info-value">${room.sharing} persons</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label"><i class="fas fa-bed"></i> Availability</div>
+        <div class="info-value">${vacancyBadge}</div>
+      </div>
+      ${occupantsHtml}
     `;
   } catch (err) {
-    document.getElementById('roomInfo').textContent = 'Error loading room information.';
-    console.error(err);
+    console.error('Error loading room:', err);
+    container.innerHTML = `
+      <div class="no-room">
+        <div class="no-room-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Error Loading Data</h3>
+        <p>Unable to load room information. Please try again later.</p>
+        <button class="retry-btn" onclick="loadMyRoom()"><i class="fas fa-sync-alt"></i> Retry</button>
+      </div>
+    `;
   }
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// ===== LOGOUT =====
 document.getElementById('logout-btn').addEventListener('click', async () => {
   try {
     const res = await fetch('/user/logout', { method: 'POST' });
     const data = await res.json();
-    if (data.success) window.location.href = 'login.html';
-    else alert('Logout failed');
-  } catch (err) { console.error(err); }
+    if (data.success) {
+      window.location.href = 'login.html';
+    } else {
+      showToast('Logout failed', true);
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error logging out', true);
+  }
 });
 
-loadUserInfo().then(loadMyRoom);
-</script>
+// ===== AUTO-REFRESH =====
+setInterval(loadMyRoom, 30000);
 
+// ===== INITIALIZE =====
+loadUserInfo();
+</script>
 </body>
 </html>
